@@ -1,6 +1,9 @@
-// LLM Benchmark Costco 卡片组件
-// 设计：名称无边框，纯文字 + 彩色文字阴影，悬浮时有光晕效果
-// 广泛采用：大勋章图标叠加在卡片右上角
+// LLM Benchmark Costco — BenchmarkCard
+// 设计语言：OpenAI 极简风格
+//   - 无彩色边框装饰，卡片用极细灰色边框
+//   - 名称前置勋章（广泛采用），名称本身用分类色
+//   - 字体层级清晰：名称 semibold → 简介 regular → 元信息 small
+//   - hover 仅用轻微阴影提升，不做大幅位移
 import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
 import { Calendar, Building2, BarChart3, Layers, Lock, Unlock, ShieldAlert } from 'lucide-react';
@@ -12,131 +15,91 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-const DIFFICULTY_STYLE_LIGHT: Record<string, string> = {
-  '前沿': 'bg-red-50 text-red-700 border border-red-200',
-  '专家': 'bg-orange-50 text-orange-700 border border-orange-200',
-  '进阶': 'bg-blue-50 text-blue-700 border border-blue-200',
-  '基础': 'bg-gray-50 text-gray-600 border border-gray-200',
-};
-
-const DIFFICULTY_STYLE_DARK: Record<string, string> = {
-  '前沿': 'bg-red-950/50 text-red-400 border border-red-900/60',
-  '专家': 'bg-orange-950/50 text-orange-400 border border-orange-900/60',
-  '进阶': 'bg-blue-950/50 text-blue-400 border border-blue-900/60',
-  '基础': 'bg-gray-800/50 text-gray-400 border border-gray-700/60',
+const DIFFICULTY_COLORS: Record<string, { text: string; bg: string; bgDark: string }> = {
+  '前沿': { text: '#DC2626', bg: 'rgba(220,38,38,0.08)', bgDark: 'rgba(220,38,38,0.12)' },
+  '专家': { text: '#D97706', bg: 'rgba(217,119,6,0.08)', bgDark: 'rgba(217,119,6,0.12)' },
+  '进阶': { text: '#2563EB', bg: 'rgba(37,99,235,0.08)', bgDark: 'rgba(37,99,235,0.12)' },
+  '基础': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
 };
 
 const OPENNESS_CONFIG: Record<string, { icon: typeof Unlock; color: string; label: string }> = {
-  'public': { icon: Unlock, color: '#10A37F', label: 'Public' },
-  'partly public': { icon: ShieldAlert, color: '#F59E0B', label: 'Partly' },
-  'in-house': { icon: Lock, color: '#EF4444', label: 'In-house' },
+  'public':        { icon: Unlock,      color: '#10A37F', label: 'Public'  },
+  'partly public': { icon: ShieldAlert, color: '#F59E0B', label: 'Partly'  },
+  'in-house':      { icon: Lock,        color: '#EF4444', label: 'Private' },
 };
 
-// 机构名截断：最多显示 N 个字符
-function truncateOrg(org: string, maxLen = 18): string {
+function truncateOrg(org: string, maxLen = 20): string {
   if (!org) return '';
-  // 取第一个机构（逗号/顿号分隔）
   const first = org.split(/[、,，]/)[0].trim();
-  if (first.length <= maxLen) return first;
-  return first.slice(0, maxLen - 1) + '…';
+  return first.length <= maxLen ? first : first.slice(0, maxLen - 1) + '…';
 }
 
 export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-
-  const diffStyle = isDark
-    ? (DIFFICULTY_STYLE_DARK[b.difficulty] || 'bg-gray-800/50 text-gray-400 border border-gray-700/60')
-    : (DIFFICULTY_STYLE_LIGHT[b.difficulty] || 'bg-gray-50 text-gray-600 border border-gray-200');
-
-  const opennessInfo = OPENNESS_CONFIG[b.openness];
   const widelyTested = (b as any).widely_tested === true;
-
-  // 名称文字阴影：多层叠加，产生发光感
-  const nameTextShadow = isDark
-    ? `0 0 12px ${b.l1_color}99, 0 0 24px ${b.l1_color}44, 0 1px 3px rgba(0,0,0,0.8)`
-    : `0 0 8px ${b.l1_color}55, 0 1px 2px rgba(0,0,0,0.12), 0 2px 8px ${b.l1_color}33`;
+  const diffColor = DIFFICULTY_COLORS[b.difficulty];
+  const opennessInfo = OPENNESS_CONFIG[b.openness];
 
   return (
-    <div
-      className="group relative cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
-      style={{ ...style }}
+    <article
+      className="group relative cursor-pointer"
+      style={style}
       onClick={() => onClick(b)}
     >
-      {/* ── 卡片主体 ── */}
       <div
-        className={`relative rounded-xl border transition-all duration-200 overflow-hidden ${
-          isDark
-            ? 'bg-[#161616] border-gray-800 group-hover:border-gray-700 group-hover:shadow-xl group-hover:shadow-black/40'
-            : 'bg-white border-gray-200 group-hover:border-gray-300 group-hover:shadow-lg group-hover:shadow-gray-200/80'
-        }`}
+        className={`
+          h-full flex flex-col rounded-2xl border transition-all duration-200
+          ${isDark
+            ? 'bg-[#161616] border-[#242424] hover:border-[#333] hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
+            : 'bg-white border-[#E5E7EB] hover:border-[#D1D5DB] hover:shadow-[0_4px_24px_rgba(0,0,0,0.07)]'
+          }
+        `}
       >
-        {/* 渐变色边框 overlay - hover 时显示 */}
+        {/* ── 顶部色条（分类色，仅 3px 高，圆角顶部） ── */}
         <div
-          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{
-            background: `linear-gradient(135deg, ${b.l1_color}88, ${b.l1_color}22, ${b.l1_color}55)`,
-            padding: '1px',
-            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-            WebkitMaskComposite: 'xor',
-            maskComposite: 'exclude',
-          }}
-        />
-
-        {/* 左侧分类色条 */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl transition-all duration-200 group-hover:w-[4px]"
+          className="h-[3px] w-full rounded-t-2xl shrink-0"
           style={{ backgroundColor: b.l1_color }}
         />
 
-        {/* 广泛采用勋章 - 右上角大图标 */}
-        {widelyTested && (
-          <div
-            className="absolute top-2.5 right-2.5 z-10 pointer-events-none select-none"
-            title="被主要大模型厂商技术报告广泛测试"
-          >
-            <div className="relative flex items-center justify-center">
-              {/* 光晕背景 */}
-              <div
-                className="absolute inset-0 rounded-full blur-md opacity-60"
-                style={{ background: 'radial-gradient(circle, #F59E0B88 0%, transparent 70%)', transform: 'scale(1.8)' }}
-              />
-              {/* 勋章 emoji */}
-              <span
-                className="relative text-[22px] leading-none drop-shadow-lg"
-                style={{
-                  filter: 'drop-shadow(0 0 6px #F59E0Baa) drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-                }}
-              >
-                🏅
-              </span>
-            </div>
-          </div>
-        )}
+        {/* ── 卡片内容 ── */}
+        <div className="flex flex-col flex-1 px-5 pt-4 pb-4 gap-3">
 
-        {/* 卡片内容 */}
-        <div className="pl-5 pr-4 pt-4 pb-4">
-          {/* 顶部：名称 + 难度标签 */}
-          <div className="flex items-start justify-between gap-2 mb-2.5">
-            {/* 名称：无框，纯文字 + 阴影 */}
-            <div className="min-w-0 flex-1" style={{ paddingRight: widelyTested ? '28px' : '0' }}>
+          {/* 第一行：勋章 + 名称 + 难度 */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              {/* 广泛采用勋章：名称前，与文字基线对齐 */}
+              {widelyTested && (
+                <span
+                  className="shrink-0 text-[16px] leading-none select-none"
+                  title="被主要大模型厂商技术报告广泛采用"
+                  style={{ filter: 'drop-shadow(0 1px 3px rgba(245,158,11,0.5))' }}
+                >
+                  🏅
+                </span>
+              )}
+              {/* 名称 */}
               <span
-                className="font-bold text-[14px] leading-tight block truncate"
+                className="font-semibold text-[14px] leading-snug truncate"
                 style={{
                   color: b.l1_color,
-                  fontFamily: 'var(--font-mono)',
-                  letterSpacing: '-0.02em',
-                  textShadow: nameTextShadow,
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {b.name}
               </span>
             </div>
+
             {/* 难度标签 */}
-            {b.difficulty && (
+            {b.difficulty && diffColor && (
               <span
-                className={`tag-capsule shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${diffStyle}`}
-                style={{ fontFamily: 'var(--font-mono)' }}
+                className="shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-md"
+                style={{
+                  color: diffColor.text,
+                  backgroundColor: isDark ? diffColor.bgDark : diffColor.bg,
+                  fontFamily: "'Inter', sans-serif",
+                }}
               >
                 {b.difficulty}
               </span>
@@ -144,31 +107,35 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
           </div>
 
           {/* 简介 */}
-          <p className={`text-[12.5px] leading-relaxed line-clamp-2 mb-3 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p
+            className="text-[13px] leading-relaxed line-clamp-2 flex-1"
+            style={{ color: isDark ? '#9CA3AF' : '#6B7280' }}
+          >
             {b.intro || '暂无简介'}
           </p>
 
           {/* 元信息行 */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {b.published && (
-              <span className={`flex items-center gap-1 text-[11.5px] transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+              <span className="flex items-center gap-1 text-[11.5px]" style={{ color: isDark ? '#6B7280' : '#9CA3AF' }}>
                 <Calendar size={11} />
                 {b.published}
               </span>
             )}
             {b.org && (
               <span
-                className={`flex items-center gap-1 text-[11.5px] transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+                className="flex items-center gap-1 text-[11.5px]"
+                style={{ color: isDark ? '#6B7280' : '#9CA3AF' }}
                 title={b.org}
               >
                 <Building2 size={11} className="shrink-0" />
-                <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+                <span className="truncate" style={{ maxWidth: '130px' }}>
                   {truncateOrg(b.org)}
                 </span>
               </span>
             )}
             {b.has_leaderboard && (
-              <span className="flex items-center gap-1 text-[11.5px] text-[#10A37F]">
+              <span className="flex items-center gap-1 text-[11.5px]" style={{ color: '#10A37F' }}>
                 <BarChart3 size={11} />
                 排行榜
               </span>
@@ -182,14 +149,13 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
           </div>
 
           {/* 底部标签行 */}
-          <div className="flex flex-wrap gap-1.5">
-            {/* L1 标签 */}
+          <div className="flex flex-wrap gap-1.5 pt-1 border-t" style={{ borderColor: isDark ? '#242424' : '#F3F4F6' }}>
+            {/* L1 分类标签 */}
             <span
-              className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full"
+              className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md"
               style={{
-                backgroundColor: b.l1_color + (isDark ? '22' : '15'),
+                backgroundColor: b.l1_color + (isDark ? '1A' : '12'),
                 color: b.l1_color,
-                fontFamily: 'var(--font-mono)',
               }}
             >
               <Layers size={9} />
@@ -198,10 +164,11 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             {/* Family 标签 */}
             {b.family && (
               <span
-                className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors ${
-                  isDark ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/40' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                }`}
-                style={{ fontFamily: 'var(--font-mono)' }}
+                className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md"
+                style={{
+                  backgroundColor: isDark ? 'rgba(16,163,127,0.10)' : 'rgba(16,163,127,0.08)',
+                  color: '#10A37F',
+                }}
               >
                 {b.family}
               </span>
@@ -209,17 +176,19 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             {/* 模态标签 */}
             {b.modality && (
               <span
-                className={`inline-flex items-center text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
-                  isDark ? 'bg-gray-800/50 text-gray-500 border-gray-700/50' : 'bg-gray-50 text-gray-400 border-gray-100'
-                }`}
-                style={{ fontFamily: 'var(--font-mono)' }}
+                className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-md"
+                style={{
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                  color: isDark ? '#9CA3AF' : '#9CA3AF',
+                }}
               >
                 {b.modality.split('+')[0].trim()}
               </span>
             )}
           </div>
+
         </div>
       </div>
-    </div>
+    </article>
   );
 }

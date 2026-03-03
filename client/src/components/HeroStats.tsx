@@ -1,4 +1,5 @@
-// LLM Benchmark Costco Hero 统计区 - OpenAI 渐变色效果
+// LLM Benchmark Costco — HeroStats
+// 设计：OpenAI 极简风格，大数字 + 简洁描述
 import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -11,75 +12,79 @@ export default function HeroStats({ data }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const total = data.length;
-  const categories = new Set(data.map(b => b.l1)).size;
-  const families = new Set(data.filter(b => b.family).map(b => b.family)).size;
-  const widelyTested = data.filter(b => b.widely_tested).length;
+  const total       = data.length;
+  const categories  = new Set(data.map(b => b.l1)).size;
+  const families    = new Set(data.filter(b => b.family).map(b => b.family)).size;
+  const widelyTested = data.filter(b => (b as any).widely_tested).length;
 
   const stats = [
-    { value: total, label: '评测基准', suffix: '个' },
-    { value: categories, label: '能力维度', suffix: '个' },
-    { value: families, label: 'Benchmark 家族', suffix: '个' },
-    { value: widelyTested, label: '广泛测试', suffix: '个' },
+    { value: total,        label: '评测基准',          color: '#10A37F' },
+    { value: categories,   label: '能力维度',          color: '#1A73E8' },
+    { value: families,     label: 'Benchmark 家族',    color: '#7C3AED' },
+    { value: widelyTested, label: '广泛采用',           color: '#F59E0B' },
   ];
 
   return (
-    <div className="relative overflow-hidden border-b transition-colors duration-200"
-      style={{
-        borderColor: isDark ? 'rgba(55,65,81,0.5)' : 'rgba(243,244,246,1)',
-      }}
+    <div
+      className="border-b transition-colors duration-200"
+      style={{ borderColor: isDark ? '#1F1F1F' : '#F3F4F6' }}
     >
-      {/* OpenAI 风格渐变背景 */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        background: isDark
-          ? 'linear-gradient(135deg, rgba(16,163,127,0.08) 0%, rgba(26,115,232,0.06) 40%, rgba(124,58,237,0.05) 70%, rgba(15,15,15,0.95) 100%)'
-          : 'linear-gradient(135deg, rgba(16,163,127,0.06) 0%, rgba(26,115,232,0.04) 40%, rgba(124,58,237,0.03) 70%, rgba(250,250,250,0.9) 100%)',
-      }} />
-      {/* 渐变光晕 */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none" style={{
-        background: isDark
-          ? 'radial-gradient(circle, rgba(16,163,127,0.12) 0%, transparent 70%)'
-          : 'radial-gradient(circle, rgba(16,163,127,0.08) 0%, transparent 70%)',
-      }} />
-      <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full pointer-events-none" style={{
-        background: isDark
-          ? 'radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%)'
-          : 'radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%)',
-      }} />
-
-      <div className="container py-10 relative z-10">
-        {/* 标题 */}
+      <div className="container py-10">
+        {/* 标题区 */}
         <div className="mb-8">
-          <h1 className="text-[32px] font-bold tracking-tight mb-2">
-            <span className="bg-clip-text text-transparent" style={{
-              backgroundImage: isDark
-                ? 'linear-gradient(135deg, #4ADE80 0%, #10A37F 30%, #38BDF8 60%, #A78BFA 100%)'
-                : 'linear-gradient(135deg, #10A37F 0%, #1A73E8 50%, #7C3AED 100%)',
-            }}>
-              LLM Benchmark Costco
-            </span>
+          <h1
+            className="text-[30px] font-semibold tracking-tight mb-2.5"
+            style={{
+              fontFamily: "'Inter', -apple-system, sans-serif",
+              letterSpacing: '-0.02em',
+              background: isDark
+                ? 'linear-gradient(90deg, #F9FAFB 0%, #D1D5DB 100%)'
+                : 'linear-gradient(90deg, #111827 0%, #374151 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            LLM Benchmark Costco
           </h1>
-          <p className={`text-[15px] max-w-2xl leading-relaxed transition-colors ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            覆盖大型语言模型评测领域的 {total} 个主流基准，涵盖 Agent 能力、多模态理解、代码能力等 {categories} 个核心维度。
+          <p
+            className="text-[14px] max-w-xl leading-relaxed"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              color: isDark ? '#6B7280' : '#9CA3AF',
+            }}
+          >
+            覆盖大型语言模型评测领域的 <strong style={{ color: isDark ? '#D1D5DB' : '#374151', fontWeight: 600 }}>{total}</strong> 个主流基准，
+            涵盖 <strong style={{ color: isDark ? '#D1D5DB' : '#374151', fontWeight: 600 }}>{categories}</strong> 个核心能力维度。
             每个基准均附有完整论文文档，支持在线阅读。
           </p>
         </div>
 
         {/* 统计数字 */}
-        <div className="flex flex-wrap gap-8">
+        <div className="flex flex-wrap gap-10">
           {stats.map((s, i) => (
-            <div key={i} className="flex flex-col">
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-[28px] font-bold tabular-nums bg-clip-text text-transparent" style={{
-                  backgroundImage: isDark
-                    ? `linear-gradient(135deg, ${['#4ADE80','#38BDF8','#A78BFA','#FBBF24'][i]} 0%, ${['#10A37F','#1A73E8','#7C3AED','#F59E0B'][i]} 100%)`
-                    : `linear-gradient(135deg, ${['#10A37F','#1A73E8','#7C3AED','#F59E0B'][i]} 0%, ${['#059669','#1557B0','#5B21B6','#D97706'][i]} 100%)`,
-                }}>
+            <div key={i} className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-1">
+                <span
+                  className="text-[32px] font-bold tabular-nums leading-none"
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    letterSpacing: '-0.03em',
+                    color: s.color,
+                  }}
+                >
                   {s.value}
                 </span>
-                <span className={`text-[16px] font-medium ml-0.5 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{s.suffix}</span>
               </div>
-              <span className={`text-[13px] mt-0.5 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{s.label}</span>
+              <span
+                className="text-[12px]"
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  color: isDark ? '#4B5563' : '#9CA3AF',
+                }}
+              >
+                {s.label}
+              </span>
             </div>
           ))}
         </div>

@@ -1,4 +1,5 @@
-// LLM Benchmark Costco 顶部导航栏
+// LLM Benchmark Costco — Navbar
+// 设计：OpenAI 极简风格，纯白/深色背景，细边框，Inter 字体
 import React from 'react';
 import { Search, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -15,66 +16,104 @@ export default function Navbar({ search, onSearchChange, total, filtered }: Prop
   const isDark = theme === 'dark';
 
   return (
-    <header className={`sticky top-0 z-30 backdrop-blur-sm border-b transition-colors duration-200 ${
-      isDark
-        ? 'bg-[#0F0F0F]/95 border-gray-800'
-        : 'bg-white/95 border-gray-100'
-    }`}>
+    <header
+      className={`sticky top-0 z-30 border-b transition-colors duration-200 ${
+        isDark
+          ? 'bg-[#0F0F0F]/96 border-[#242424]'
+          : 'bg-white/96 border-[#E5E7EB]'
+      }`}
+      style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+    >
       <div className="container">
-        <div className="flex items-center gap-4 h-14">
-          {/* Logo - 显微镜 emoji */}
+        <div className="flex items-center gap-5 h-14">
+
+          {/* Logo */}
           <div className="flex items-center gap-2.5 shrink-0">
-            <span className="text-[22px] leading-none" role="img" aria-label="microscope">🔬</span>
-            <span className="font-semibold text-[15px] tracking-tight bg-clip-text text-transparent"
-              style={{
-                backgroundImage: 'linear-gradient(135deg, #10A37F 0%, #1A73E8 50%, #7C3AED 100%)',
-              }}
-            >
-              LLM Benchmark Costco
-            </span>
+            <span className="text-[20px] leading-none select-none" role="img" aria-label="microscope">🔬</span>
+            <div className="flex flex-col leading-none">
+              <span
+                className="font-semibold text-[14px] tracking-tight"
+                style={{
+                  fontFamily: "'Inter', -apple-system, sans-serif",
+                  background: 'linear-gradient(90deg, #10A37F 0%, #1A73E8 60%, #7C3AED 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                LLM Benchmark Costco
+              </span>
+            </div>
           </div>
 
           {/* 搜索框 */}
-          <div className="flex-1 max-w-xl relative">
-            <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+          <div className="flex-1 max-w-lg relative">
+            <Search
+              size={13}
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: isDark ? '#6B7280' : '#9CA3AF' }}
+            />
             <input
               type="text"
-              placeholder="搜索 Benchmark 名称、机构、分类..."
+              placeholder="搜索名称、机构、分类..."
               value={search}
               onChange={e => onSearchChange(e.target.value)}
-              className={`w-full pl-9 pr-8 py-2 text-[13px] border rounded-lg outline-none transition-all placeholder:text-gray-400 ${
-                isDark
-                  ? 'bg-gray-800/80 border-gray-700 text-gray-200 focus:border-[#10A37F] focus:ring-2 focus:ring-[#10A37F]/10'
-                  : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-[#10A37F] focus:ring-2 focus:ring-[#10A37F]/10'
-              }`}
+              className="w-full pl-9 pr-8 py-[7px] text-[13px] border rounded-xl outline-none transition-all"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                backgroundColor: isDark ? '#1A1A1A' : '#F9FAFB',
+                borderColor: isDark ? '#2D2D2D' : '#E5E7EB',
+                color: isDark ? '#E5E7EB' : '#111827',
+                boxShadow: 'none',
+              }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = '#10A37F';
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(16,163,127,0.08)';
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = isDark ? '#2D2D2D' : '#E5E7EB';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
             {search && (
               <button
                 onClick={() => onSearchChange('')}
-                className={`absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: isDark ? '#6B7280' : '#9CA3AF' }}
               >
                 <X size={13} />
               </button>
             )}
           </div>
 
-          {/* 统计 */}
-          <div className={`hidden sm:flex items-center gap-1 text-[13px] shrink-0 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-            <span className={`font-semibold transition-colors ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{filtered}</span>
-            {filtered !== total && <span>/ {total}</span>}
+          {/* 统计数字 */}
+          <div
+            className="hidden sm:flex items-center gap-1 text-[13px] shrink-0"
+            style={{ fontFamily: "'Inter', sans-serif", color: isDark ? '#6B7280' : '#9CA3AF' }}
+          >
+            <span style={{ fontWeight: 600, color: isDark ? '#E5E7EB' : '#111827' }}>{filtered}</span>
+            {filtered !== total && <span style={{ color: isDark ? '#4B5563' : '#D1D5DB' }}>/ {total}</span>}
             <span>个 Benchmark</span>
           </div>
 
-          {/* 深色模式切换 */}
+          {/* 主题切换 */}
           {switchable && toggleTheme && (
             <button
               onClick={toggleTheme}
-              title={isDark ? '切换到亮色模式' : '切换到深色模式'}
-              className={`p-2 rounded-lg transition-colors shrink-0 ${
-                isDark
-                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
-                  : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
-              }`}
+              title={isDark ? '切换亮色' : '切换深色'}
+              className="p-2 rounded-xl transition-colors shrink-0"
+              style={{
+                color: isDark ? '#6B7280' : '#9CA3AF',
+                backgroundColor: 'transparent',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = isDark ? '#1F1F1F' : '#F3F4F6';
+                e.currentTarget.style.color = isDark ? '#E5E7EB' : '#374151';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = isDark ? '#6B7280' : '#9CA3AF';
+              }}
             >
               {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
@@ -82,13 +121,22 @@ export default function Navbar({ search, onSearchChange, total, filtered }: Prop
         </div>
       </div>
 
-      {/* Powered by 标识 */}
-      <div className={`border-t transition-colors duration-200 ${isDark ? 'border-gray-800/60' : 'border-gray-50'}`}>
+      {/* 底部 powered by 标识 */}
+      <div
+        className="border-t transition-colors duration-200"
+        style={{ borderColor: isDark ? '#1A1A1A' : '#F9FAFB' }}
+      >
         <div className="container">
-          <div className="flex items-center justify-end h-6">
-            <span className={`text-[11px] tracking-wide transition-colors ${isDark ? 'text-gray-600' : 'text-gray-300'}`}>
+          <div className="flex items-center justify-end h-[22px]">
+            <span
+              className="text-[11px]"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                color: isDark ? '#3D3D3D' : '#D1D5DB',
+              }}
+            >
               powered by{' '}
-              <span className={`font-semibold transition-colors ${isDark ? 'text-[#10A37F]/70' : 'text-[#10A37F]/60'}`}>
+              <span style={{ fontWeight: 600, color: isDark ? '#10A37F66' : '#10A37F88' }}>
                 Ant AQ eval team
               </span>
             </span>
