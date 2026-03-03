@@ -49,7 +49,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
     >
       <div
         className={`
-          h-full flex flex-col rounded-2xl border transition-all duration-200
+          h-full flex flex-col rounded-2xl border overflow-hidden transition-all duration-200
           ${isDark
             ? 'bg-[#161616] border-[#242424] hover:border-[#333] hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
             : 'bg-white border-[#E5E7EB] hover:border-[#D1D5DB] hover:shadow-[0_4px_24px_rgba(0,0,0,0.07)]'
@@ -58,7 +58,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
       >
         {/* ── 顶部色条（分类色，仅 3px 高，圆角顶部） ── */}
         <div
-          className="h-[3px] w-full rounded-t-2xl shrink-0"
+          className="h-[3px] w-full shrink-0"
           style={{ backgroundColor: b.l1_color }}
         />
 
