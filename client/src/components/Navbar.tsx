@@ -1,4 +1,4 @@
-// OpenAI 风格顶部导航栏
+// LLM Benchmark Costco 顶部导航栏
 import React from 'react';
 import { Search, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -33,7 +33,7 @@ export default function Navbar({ search, onSearchChange, total, filtered }: Prop
               </svg>
             </div>
             <span className={`font-semibold text-[15px] tracking-tight transition-colors ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-              Benchmark Hub
+              LLM Benchmark Costco
             </span>
           </div>
 

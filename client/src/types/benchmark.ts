@@ -13,7 +13,7 @@ export interface Benchmark {
   org: string;
   build_method: string;
   metric: string;
-  openness: string;
+  openness: string;       // 'public' | 'partly public' | 'in-house'
   modality: string;
   language: string;
   task_type: string;
@@ -22,6 +22,12 @@ export interface Benchmark {
   scale: string;
   has_leaderboard: boolean;
   pdf_filename: string;
+  // New fields
+  family: string;         // Family name, empty if standalone
+  variant: string;        // Variant/version name within family
+  widely_tested: boolean; // Medal: widely tested by major LLM tech reports
+  related_benchmarks: string[]; // Related benchmark names
+  homepage: string;       // Official homepage URL
 }
 
 export const L1_CATEGORIES = [
@@ -40,5 +46,7 @@ export const L1_CATEGORIES = [
 ] as const;
 
 export const DIFFICULTY_LEVELS = ['前沿', '专家', '进阶', '基础'] as const;
+
+export const OPENNESS_LEVELS = ['public', 'partly public', 'in-house'] as const;
 
 export const YEARS = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012'] as const;

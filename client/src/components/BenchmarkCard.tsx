@@ -1,8 +1,8 @@
-// OpenAI 风格胶囊卡片组件
-// 设计：白底、左侧色条、胶囊标签、hover 轻阴影
+// LLM Benchmark Costco 胶囊卡片组件
+// 设计：白底、左侧色条、胶囊标签、勋章、公开性、年月显示
 import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
-import { Calendar, Building2, BarChart3, Layers } from 'lucide-react';
+import { Calendar, Building2, BarChart3, Layers, Award, Lock, Unlock, ShieldAlert } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface Props {
@@ -25,6 +25,12 @@ const DIFFICULTY_STYLE_DARK: Record<string, string> = {
   '基础': 'bg-gray-800/50 text-gray-400 border border-gray-700/60',
 };
 
+const OPENNESS_CONFIG: Record<string, { icon: typeof Unlock; color: string; label: string }> = {
+  'public': { icon: Unlock, color: '#10A37F', label: 'Public' },
+  'partly public': { icon: ShieldAlert, color: '#F59E0B', label: 'Partly' },
+  'in-house': { icon: Lock, color: '#EF4444', label: 'In-house' },
+};
+
 export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -32,6 +38,8 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const diffStyle = isDark
     ? (DIFFICULTY_STYLE_DARK[b.difficulty] || 'bg-gray-800/50 text-gray-400 border border-gray-700/60')
     : (DIFFICULTY_STYLE_LIGHT[b.difficulty] || 'bg-gray-50 text-gray-600 border border-gray-200');
+
+  const opennessInfo = OPENNESS_CONFIG[b.openness];
 
   return (
     <div
@@ -51,11 +59,19 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
 
       {/* 卡片内容 */}
       <div className="pl-2">
-        {/* 顶部：名称 + 难度标签 */}
+        {/* 顶部：名称 + 勋章 + 难度标签 */}
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className={`font-semibold text-[15px] leading-snug group-hover:text-[#10A37F] transition-colors line-clamp-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-            {b.name}
-          </h3>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3 className={`font-semibold text-[15px] leading-snug group-hover:text-[#10A37F] transition-colors line-clamp-1 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+              {b.name}
+            </h3>
+            {/* 勋章：广泛测试 */}
+            {b.widely_tested && (
+              <span title="被主要大模型厂商技术报告广泛测试" className="shrink-0">
+                <Award size={14} className="text-amber-500" />
+              </span>
+            )}
+          </div>
           {b.difficulty && (
             <span className={`tag-capsule shrink-0 text-[11px] font-medium px-2 py-0.5 rounded-full ${diffStyle}`}
               style={{ fontFamily: 'var(--font-mono)' }}>
@@ -71,10 +87,11 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
 
         {/* 元信息行 */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
-          {b.year && (
+          {/* 年月显示 */}
+          {b.published && (
             <span className={`flex items-center gap-1 text-[12px] transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
               <Calendar size={11} />
-              {b.year}
+              {b.published}
             </span>
           )}
           {b.org && (
@@ -87,6 +104,13 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             <span className="flex items-center gap-1 text-[12px] text-[#10A37F]">
               <BarChart3 size={11} />
               排行榜
+            </span>
+          )}
+          {/* 公开性标签 */}
+          {opennessInfo && (
+            <span className="flex items-center gap-1 text-[11px] font-medium" style={{ color: opennessInfo.color }}>
+              <opennessInfo.icon size={10} />
+              {opennessInfo.label}
             </span>
           )}
         </div>
@@ -105,11 +129,12 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             <Layers size={9} />
             {b.l1}
           </span>
-          {/* L2 标签 */}
-          {b.l2 && b.l2 !== b.l1 && (
-            <span className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full transition-colors ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}
-              style={{ fontFamily: 'var(--font-mono)' }}>
-              {b.l2}
+          {/* Family 标签 */}
+          {b.family && (
+            <span className={`inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors ${
+              isDark ? 'bg-emerald-950/30 text-emerald-400 border-emerald-900/40' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            }`} style={{ fontFamily: 'var(--font-mono)' }}>
+              {b.family}
             </span>
           )}
           {/* 模态标签 */}

@@ -1,4 +1,4 @@
-// OpenAI 风格 Benchmark Hub 主页
+// LLM Benchmark Costco 主页
 // 设计：白底极简，#10A37F 绿色强调，Inter 字体，胶囊卡片网格
 import React, { useState, useMemo, useCallback } from 'react';
 import { useBenchmarks, useFilteredBenchmarks } from '@/hooks/useBenchmarks';
@@ -14,7 +14,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 const PAGE_SIZE = 60;
 
 type SortType = 'newest' | 'oldest' | 'name';
-type FiltersType = { search: string; l1: string; year: string; difficulty: string; modality: string; sort: SortType };
+type FiltersType = { search: string; l1: string; year: string; difficulty: string; modality: string; openness: string; sort: SortType };
 
 export default function Home() {
   const { data, loading, error } = useBenchmarks();
@@ -26,6 +26,7 @@ export default function Home() {
     year: '',
     difficulty: '',
     modality: '',
+    openness: '',
     sort: 'newest',
   });
   const { theme } = useTheme();
@@ -50,6 +51,11 @@ export default function Home() {
   const handleFilterChange = useCallback((partial: Partial<FiltersType>) => {
     setFilters(prev => ({ ...prev, ...partial }));
     setPage(1);
+  }, []);
+
+  // Handle clicking a related benchmark in the drawer
+  const handleSelectBenchmark = useCallback((b: Benchmark) => {
+    setSelected(b);
   }, []);
 
   const paged = filtered.slice(0, page * PAGE_SIZE);
@@ -114,6 +120,7 @@ export default function Home() {
                 {filters.l1 && <span className="ml-1">· {filters.l1}</span>}
                 {filters.year && <span className="ml-1">· {filters.year}年</span>}
                 {filters.difficulty && <span className="ml-1">· {filters.difficulty}难度</span>}
+                {filters.openness && <span className="ml-1">· {filters.openness}</span>}
               </p>
             </div>
 
@@ -154,7 +161,9 @@ export default function Home() {
       {/* 详情抽屉 */}
       <BenchmarkDrawer
         benchmark={selected}
+        allBenchmarks={data}
         onClose={() => setSelected(null)}
+        onSelectBenchmark={handleSelectBenchmark}
       />
 
       {/* 全局动画 */}

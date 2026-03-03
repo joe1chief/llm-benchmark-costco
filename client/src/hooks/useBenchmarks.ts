@@ -7,6 +7,7 @@ interface Filters {
   year: string;
   difficulty: string;
   modality: string;
+  openness: string;
   sort: 'newest' | 'oldest' | 'name';
 }
 
@@ -43,7 +44,8 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
         b.intro.toLowerCase().includes(q) ||
         b.org.toLowerCase().includes(q) ||
         b.l1.toLowerCase().includes(q) ||
-        b.l2.toLowerCase().includes(q)
+        b.l2.toLowerCase().includes(q) ||
+        (b.family && b.family.toLowerCase().includes(q))
       );
     }
 
@@ -67,13 +69,18 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
       result = result.filter(b => b.modality.includes(filters.modality));
     }
 
+    // 公开性筛选
+    if (filters.openness) {
+      result = result.filter(b => b.openness === filters.openness);
+    }
+
     // 排序
     if (filters.sort === 'newest') {
       result.sort((a, b) => b.published.localeCompare(a.published));
     } else if (filters.sort === 'oldest') {
       result.sort((a, b) => a.published.localeCompare(b.published));
     } else if (filters.sort === 'name') {
-      result.sort((a, b) => a.name.localeCompare(b.name));
+      result.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
     }
 
     return result;

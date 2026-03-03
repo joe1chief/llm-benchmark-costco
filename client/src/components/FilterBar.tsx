@@ -1,4 +1,4 @@
-// OpenAI 风格筛选栏
+// LLM Benchmark Costco 筛选栏
 import React from 'react';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -20,12 +20,18 @@ const L1_CATEGORIES = [
 
 const YEARS = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2012以前'];
 const DIFFICULTIES = ['前沿', '专家', '进阶', '基础'];
+const OPENNESS_OPTIONS = [
+  { value: 'public', label: 'Public', color: '#10A37F' },
+  { value: 'partly public', label: 'Partly Public', color: '#F59E0B' },
+  { value: 'in-house', label: 'In-house', color: '#EF4444' },
+];
 
 type SortType = 'newest' | 'oldest' | 'name';
 interface Filters {
   l1: string;
   year: string;
   difficulty: string;
+  openness: string;
   sort: SortType;
 }
 
@@ -36,7 +42,7 @@ interface Props {
 }
 
 export default function FilterBar({ filters, onChange, counts }: Props) {
-  const hasActive = filters.l1 || filters.year || filters.difficulty;
+  const hasActive = filters.l1 || filters.year || filters.difficulty || filters.openness;
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -101,7 +107,7 @@ export default function FilterBar({ filters, onChange, counts }: Props) {
               })}
             </div>
 
-            {/* 第二行：年份 + 难度 + 排序 */}
+            {/* 第二行：年份 + 难度 + 公开性 + 排序 */}
             <div className="flex flex-wrap items-center gap-2">
               {/* 年份下拉 */}
               <select
@@ -123,6 +129,33 @@ export default function FilterBar({ filters, onChange, counts }: Props) {
                 {DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
 
+              {/* 公开性筛选 */}
+              <div className="flex items-center gap-1">
+                {OPENNESS_OPTIONS.map(opt => {
+                  const active = filters.openness === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => onChange({ openness: active ? '' : opt.value })}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium transition-all duration-100 border ${
+                        active
+                          ? 'text-white'
+                          : isDark
+                            ? 'text-gray-400 border-gray-700 hover:border-gray-600'
+                            : 'text-gray-500 border-gray-200 hover:border-gray-300'
+                      }`}
+                      style={active ? {
+                        backgroundColor: opt.color,
+                        borderColor: opt.color,
+                      } : {}}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: opt.color }} />
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* 排序 */}
               <select
                 value={filters.sort}
@@ -131,13 +164,13 @@ export default function FilterBar({ filters, onChange, counts }: Props) {
               >
                 <option value="newest">最新优先</option>
                 <option value="oldest">最早优先</option>
-                <option value="name">名称排序</option>
+                <option value="name">字母排序 A→Z</option>
               </select>
 
               {/* 清除筛选 */}
               {hasActive && (
                 <button
-                  onClick={() => onChange({ l1: '', year: '', difficulty: '' })}
+                  onClick={() => onChange({ l1: '', year: '', difficulty: '', openness: '' })}
                   className={`flex items-center gap-1 text-[12px] transition-colors px-2 py-1 rounded-lg ${
                     isDark
                       ? 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
