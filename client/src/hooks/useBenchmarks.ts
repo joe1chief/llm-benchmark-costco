@@ -17,7 +17,7 @@ export function useBenchmarks() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('./benchmarks.json')
+    fetch(`./benchmarks.json?v=${Date.now()}`)
       .then(r => r.json())
       .then((d: Benchmark[]) => {
         setData(d);
