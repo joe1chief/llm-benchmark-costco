@@ -26,10 +26,15 @@ function truncateOrg(org: string, maxLen = 20): string {
 
 export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const { theme } = useTheme();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const isDark = theme === 'dark';
+  const isEn = lang === 'en';
   const widelyTested = (b as any).widely_tested === true;
   const diffColor = DIFFICULTY_COLORS[b.difficulty];
+
+  // Use English fields when in English mode
+  const intro = isEn ? ((b as any).intro_en || b.intro) : b.intro;
+  const modality = isEn ? ((b as any).modality_en || b.modality) : b.modality;
 
   const opennessConfig: Record<string, { icon: typeof Unlock; color: string; label: string }> = {
     'public':        { icon: Unlock,      color: '#10A37F', label: t.publicLabel  },
@@ -103,7 +108,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             className="text-[13px] leading-relaxed line-clamp-2 flex-1"
             style={{ color: isDark ? '#9CA3AF' : '#6B7280' }}
           >
-            {b.intro || (t as any).noIntro || '—'}
+            {intro || (t as any).noIntro || '—'}
           </p>
 
           {/* Meta row */}
@@ -157,12 +162,12 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
                 {b.family}
               </span>
             )}
-            {b.modality && (
+            {modality && (
               <span
                 className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-md"
                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: isDark ? '#9CA3AF' : '#9CA3AF' }}
               >
-                {b.modality.split('+')[0].trim()}
+                {modality.split('+')[0].trim()}
               </span>
             )}
           </div>

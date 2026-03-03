@@ -15092,16 +15092,7 @@
       "AndroidWorld",
       "ASPERA"
     ],
-    "homepage": "https://xbench.org/",
-    "l1_en": "Agent Capability",
-    "l2_en": "Tool invocation",
-    "difficulty_en": "Advanced",
-    "openness_en": "Public",
-    "modality_en": "text",
-    "task_type_en": "Agent task",
-    "build_method_en": "Expert construction, manual annotation",
-    "eval_feature_en": "Dynamic updating, process evaluation",
-    "intro_en": "xbench is a dynamic, career-aligned evaluation suite designed to bridge the gap between AI agent capabilities and real-world productivity. It creates metrics highly correlated with productivity value through evaluation tasks defined by industry professionals, targeting commercially significant domains. The framework can predict Technology-Market Fit (TMF) and track product capabilities over time. Initial implementations include two benchmarks, recruiting and marketing, which assess agent performance in real business scenarios."
+    "homepage": "https://xbench.org/"
   },
   {
     "id": "XLRS-Bench",
@@ -15135,16 +15126,7 @@
       "All-Angles",
       "BLINK",
       "ChartMimic"
-    ],
-    "l1_en": "Multimodal",
-    "l2_en": "Multimodal Comprehensive Evaluation",
-    "difficulty_en": "Frontier",
-    "openness_en": "Public",
-    "modality_en": "Multimodal",
-    "task_type_en": "Multimodal Question Answering, Perception and Reasoning",
-    "build_method_en": "Manual annotation, hybrid",
-    "eval_feature_en": "Ultra-high resolution, manual annotation, complex reasoning",
-    "intro_en": "XLRS-Bench is a comprehensive benchmark designed to evaluate the perception and reasoning abilities of multimodal large language models (MLLMs) in ultra-high-resolution remote sensing scenarios. It features the largest average image size to date (8500x8500), with all evaluation samples meticulously annotated by humans and supplemented by a novel semi-automatic annotator. XLRS-Bench defines 16 subtasks aimed at assessing 10 perception capabilities and 6 reasoning abilities of MLLMs, focusing on advanced cognitive processes that facilitate practical decision-making and capture spatiotemporal changes."
+    ]
   },
   {
     "id": "XSTest",
@@ -15178,16 +15160,7 @@
       "AlignBench",
       "CValues"
     ],
-    "homepage": "https://github.com/paul-rottger/xstest",
-    "l1_en": "Safety & Alignment",
-    "l2_en": "Security Assessment",
-    "difficulty_en": "Advanced",
-    "openness_en": "Public",
-    "modality_en": "text",
-    "task_type_en": "Security testing, classification, open-domain question answering",
-    "build_method_en": "Expert construction",
-    "eval_feature_en": "Adversarial",
-    "intro_en": "XSTest is a test suite designed to identify excessive safety behaviors in LLMs, containing 250 safe prompts that models should not reject and 200 unsafe prompts that should be rejected. The benchmark helps evaluate models' balance between usefulness and harmlessness, preventing overly strict safety policies from rejecting safe requests."
+    "homepage": "https://github.com/paul-rottger/xstest"
   },
   {
     "id": "ZeroBench",
@@ -15221,15 +15194,6 @@
       "BLINK",
       "ChartMimic"
     ],
-    "homepage": "https://zerobench.github.io/",
-    "l1_en": "Multimodal",
-    "l2_en": "Visual reasoning",
-    "difficulty_en": "Frontier",
-    "openness_en": "Public",
-    "modality_en": "Multimodal",
-    "task_type_en": "Open-domain Question Answering",
-    "build_method_en": "Expert construction, manual annotation",
-    "eval_feature_en": "Lightweight, diversity, high quality, manual curation, zero-shot",
-    "intro_en": "ZeroBench is a lightweight visual reasoning benchmark designed to evaluate the visual understanding capabilities of large multimodal models (LMMs). It consists of 100 carefully curated questions and 334 simpler sub-questions, aimed at pushing the limits of existing LMMs. Evaluations of 20 LMMs all resulted in scores of 0.0%, revealing their shortcomings in visual interpretation. The release of ZeroBench aims to advance the field of visual understanding."
+    "homepage": "https://zerobench.github.io/"
   }
 ]

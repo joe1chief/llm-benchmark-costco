@@ -56,8 +56,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
   const [pdfError, setPdfError] = useState(false);
   const [strategyIndex, setStrategyIndex] = useState(0);
   const { theme } = useTheme();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const isDark = theme === 'dark';
+  const isEn = lang === 'en';
 
   useEffect(() => {
     if (b) {
@@ -147,7 +148,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
               </span>
               {b.l2 && b.l2 !== b.l1 && b.l2 !== 'nan' && (
                 <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-colors ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}
-                  style={{ fontFamily: 'var(--font-mono)' }}>{b.l2}</span>
+                  style={{ fontFamily: 'var(--font-mono)' }}>{isEn ? ((b as any).l2_en || b.l2) : b.l2}</span>
               )}
               {b.difficulty && b.difficulty !== 'nan' && (
                 <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-0.5 rounded-full border transition-colors ${isDark ? 'bg-orange-950/40 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-100'}`}
@@ -220,7 +221,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
               )}
 
               {/* Intro */}
-              <p className={`text-[14px] leading-relaxed transition-colors ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{b.intro}</p>
+              <p className={`text-[14px] leading-relaxed transition-colors ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                {isEn ? ((b as any).intro_en || b.intro) : b.intro}
+              </p>
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
@@ -270,9 +273,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                 <div className="px-4">
                   <InfoRow label={t.fieldPublished} value={b.published} isDark={isDark} />
                   <InfoRow label={t.fieldOrg}       value={b.org}       isDark={isDark} />
-                  <InfoRow label={t.fieldModality}  value={b.modality}  isDark={isDark} />
+                  <InfoRow label={t.fieldModality}  value={isEn ? ((b as any).modality_en || b.modality) : b.modality}  isDark={isDark} />
                   <InfoRow label={t.fieldLanguage}  value={b.language}  isDark={isDark} />
-                  <InfoRow label={t.fieldTaskType}  value={b.task_type} isDark={isDark} />
+                  <InfoRow label={t.fieldTaskType}  value={isEn ? ((b as any).task_type_en || b.task_type) : b.task_type} isDark={isDark} />
                   <InfoRow label={t.fieldScale}     value={b.scale}     isDark={isDark} />
                 </div>
               </div>
@@ -283,9 +286,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                   <span className={`text-[11px] font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t.sectionEval}</span>
                 </div>
                 <div className="px-4">
-                  <InfoRow label={t.fieldBuildMethod}  value={b.build_method} isDark={isDark} />
+                  <InfoRow label={t.fieldBuildMethod}  value={isEn ? ((b as any).build_method_en || b.build_method) : b.build_method} isDark={isDark} />
                   <InfoRow label={t.fieldMetric}       value={b.metric}       isDark={isDark} />
-                  <InfoRow label={t.fieldEvalFeature}  value={b.eval_feature} isDark={isDark} />
+                  <InfoRow label={t.fieldEvalFeature}  value={isEn ? ((b as any).eval_feature_en || b.eval_feature) : b.eval_feature} isDark={isDark} />
                   <InfoRow label={t.fieldDataAccess}   value={opennessInfo?.label || b.openness} isDark={isDark} />
                   <div className="flex gap-3 py-2.5">
                     <span className={`text-[12px] w-24 shrink-0 pt-0.5 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t.fieldLeaderboard}</span>
