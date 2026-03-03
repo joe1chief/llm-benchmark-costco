@@ -20,7 +20,8 @@ const L1_CATEGORIES = [
 ];
 
 const YEARS = ['2026','2025','2024','2023','2022','2021','2020','2019','2018','2017','2016','2015','2014','2013','2012','2012以前'];
-const DIFFICULTIES = ['前沿','专家','进阶','基础'];
+const DIFFICULTIES_ZH = ['前沿','专家','进阶','基础','中等'];
+const DIFFICULTIES_EN = ['Frontier','Expert','Advanced','Basic','Intermediate'];
 
 type SortType = 'newest' | 'oldest' | 'name';
 interface Filters {
@@ -172,7 +173,7 @@ export default function FilterBar({ filters, onChange, counts, widelyTestedCount
               {/* Difficulty */}
               <select value={filters.difficulty} onChange={e => onChange({ difficulty: e.target.value })} style={baseSelectStyle}>
                 <option value="">{t.allDifficulty}</option>
-                {DIFFICULTIES.map(d => (
+                {(lang === 'zh' ? DIFFICULTIES_ZH : DIFFICULTIES_EN).map(d => (
                   <option key={d} value={d}>{t.difficulty[d] || d}</option>
                 ))}
               </select>

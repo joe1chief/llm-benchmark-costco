@@ -60,9 +60,19 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
       result = result.filter(b => b.year === filters.year);
     }
 
-    // 难度筛选
+    // 难度筛选（支持中英文 key 互相匹配）
     if (filters.difficulty) {
-      result = result.filter(b => b.difficulty === filters.difficulty);
+      const DIFF_MAP: Record<string, string> = {
+        '前沿': 'Frontier', '专家': 'Expert', '进阶': 'Advanced', '基础': 'Basic', '中等': 'Intermediate',
+        'Frontier': '前沿', 'Expert': '专家', 'Advanced': '进阶', 'Basic': '基础', 'Intermediate': '中等',
+      };
+      result = result.filter(b => {
+        const bDiffEn = (b as any).difficulty_en || b.difficulty;
+        return b.difficulty === filters.difficulty ||
+          bDiffEn === filters.difficulty ||
+          DIFF_MAP[b.difficulty] === filters.difficulty ||
+          DIFF_MAP[bDiffEn] === filters.difficulty;
+      });
     }
 
     // 模态筛选

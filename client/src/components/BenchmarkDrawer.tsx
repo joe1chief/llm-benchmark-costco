@@ -274,9 +274,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                   <InfoRow label={t.fieldPublished} value={b.published} isDark={isDark} />
                   <InfoRow label={t.fieldOrg}       value={b.org}       isDark={isDark} />
                   <InfoRow label={t.fieldModality}  value={isEn ? ((b as any).modality_en || b.modality) : b.modality}  isDark={isDark} />
-                  <InfoRow label={t.fieldLanguage}  value={b.language}  isDark={isDark} />
+                  <InfoRow label={t.fieldLanguage}  value={isEn ? ((b as any).language_en || b.language) : b.language}  isDark={isDark} />
                   <InfoRow label={t.fieldTaskType}  value={isEn ? ((b as any).task_type_en || b.task_type) : b.task_type} isDark={isDark} />
-                  <InfoRow label={t.fieldScale}     value={b.scale}     isDark={isDark} />
+                  <InfoRow label={t.fieldScale}     value={isEn ? ((b as any).scale_en || b.scale) : b.scale}     isDark={isDark} />
                 </div>
               </div>
 
@@ -287,7 +287,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                 </div>
                 <div className="px-4">
                   <InfoRow label={t.fieldBuildMethod}  value={isEn ? ((b as any).build_method_en || b.build_method) : b.build_method} isDark={isDark} />
-                  <InfoRow label={t.fieldMetric}       value={b.metric}       isDark={isDark} />
+                  <InfoRow label={t.fieldMetric}       value={isEn ? ((b as any).metric_en || b.metric) : b.metric}       isDark={isDark} />
                   <InfoRow label={t.fieldEvalFeature}  value={isEn ? ((b as any).eval_feature_en || b.eval_feature) : b.eval_feature} isDark={isDark} />
                   <InfoRow label={t.fieldDataAccess}   value={opennessInfo?.label || b.openness} isDark={isDark} />
                   <div className="flex gap-3 py-2.5">

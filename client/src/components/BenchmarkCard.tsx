@@ -12,10 +12,18 @@ interface Props {
 }
 
 const DIFFICULTY_COLORS: Record<string, { text: string; bg: string; bgDark: string }> = {
+  // Chinese keys
   '前沿': { text: '#DC2626', bg: 'rgba(220,38,38,0.08)', bgDark: 'rgba(220,38,38,0.12)' },
   '专家': { text: '#D97706', bg: 'rgba(217,119,6,0.08)', bgDark: 'rgba(217,119,6,0.12)' },
   '进阶': { text: '#2563EB', bg: 'rgba(37,99,235,0.08)', bgDark: 'rgba(37,99,235,0.12)' },
   '基础': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
+  '中等': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
+  // English keys
+  'Frontier': { text: '#DC2626', bg: 'rgba(220,38,38,0.08)', bgDark: 'rgba(220,38,38,0.12)' },
+  'Expert': { text: '#D97706', bg: 'rgba(217,119,6,0.08)', bgDark: 'rgba(217,119,6,0.12)' },
+  'Advanced': { text: '#2563EB', bg: 'rgba(37,99,235,0.08)', bgDark: 'rgba(37,99,235,0.12)' },
+  'Basic': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
+  'Intermediate': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
 };
 
 function truncateOrg(org: string, maxLen = 20): string {
@@ -30,7 +38,9 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const isDark = theme === 'dark';
   const isEn = lang === 'en';
   const widelyTested = (b as any).widely_tested === true;
-  const diffColor = DIFFICULTY_COLORS[b.difficulty];
+  // Use English difficulty key when in English mode
+  const diffKey = isEn ? ((b as any).difficulty_en || b.difficulty) : b.difficulty;
+  const diffColor = DIFFICULTY_COLORS[diffKey] || DIFFICULTY_COLORS[b.difficulty];
 
   // Use English fields when in English mode
   const intro = isEn ? ((b as any).intro_en || b.intro) : b.intro;
@@ -98,7 +108,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
                   fontFamily: "'Inter', sans-serif",
                 }}
               >
-                {t.difficulty[b.difficulty] || b.difficulty}
+                {t.difficulty[b.difficulty] || (b as any).difficulty_en || b.difficulty}
               </span>
             )}
           </div>
