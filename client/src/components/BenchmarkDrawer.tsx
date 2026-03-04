@@ -59,9 +59,10 @@ function MermaidChart({ code, isDark }: { code: string; isDark: boolean }) {
   const [svgContent, setSvgContent] = useState<string>('');
 
   useEffect(() => {
-    if (!code || !containerRef.current) return;
+    if (!code) return;
     setLoading(true);
     setError(null);
+    setSvgContent('');
 
     const renderChart = async () => {
       try {
