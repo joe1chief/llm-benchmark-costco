@@ -53,15 +53,19 @@ type PdfStrategy = 'direct' | 'google' | 'pdfjs';
 function getPdfStrategies(pdfUrl: string): { strategy: PdfStrategy; url: string; label: string }[] {
   const strategies: { strategy: PdfStrategy; url: string; label: string }[] = [];
   if (pdfUrl) {
-    strategies.push({
-      strategy: 'pdfjs',
-      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`,
-      label: 'PDF.js Viewer',
-    });
+    // Google Docs viewer first — handles CORS transparently, avoids
+    // the cross-origin SecurityError that mozilla.github.io/pdf.js emits
+    // when loading arxiv / CDN PDFs from a different origin.
     strategies.push({
       strategy: 'google',
       url: `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`,
       label: 'Google Docs',
+    });
+    // PDF.js viewer as fallback
+    strategies.push({
+      strategy: 'pdfjs',
+      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`,
+      label: 'PDF.js Viewer',
     });
     if (!pdfUrl.includes('arxiv.org')) {
       strategies.push({ strategy: 'direct', url: pdfUrl, label: 'Direct Embed' });

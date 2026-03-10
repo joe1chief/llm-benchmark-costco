@@ -33,15 +33,19 @@ type PdfStrategy = 'direct' | 'google' | 'pdfjs';
 function getPdfStrategies(pdfUrl: string): { strategy: PdfStrategy; url: string; label: string }[] {
   const strategies: { strategy: PdfStrategy; url: string; label: string }[] = [];
   if (pdfUrl) {
-    strategies.push({
-      strategy: 'pdfjs',
-      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`,
-      label: 'PDF.js Viewer',
-    });
+    // Google Docs viewer first — handles CORS transparently, avoids
+    // the cross-origin SecurityError that mozilla.github.io/pdf.js emits
+    // when loading arxiv / CDN PDFs from a different origin.
     strategies.push({
       strategy: 'google',
       url: `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`,
       label: 'Google Docs',
+    });
+    // PDF.js viewer as fallback
+    strategies.push({
+      strategy: 'pdfjs',
+      url: `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`,
+      label: 'PDF.js Viewer',
     });
     if (!pdfUrl.includes('arxiv.org')) {
       strategies.push({ strategy: 'direct', url: pdfUrl, label: 'Direct' });
@@ -328,7 +332,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
   const tabs = [
     { key: 'info', icon: BookOpen, label: t.detailsTab, disabled: false },
     { key: 'flowchart', icon: GitBranch, label: isEn ? 'Build Process' : '构建流程', disabled: !hasFlowchart },
-    { key: 'pdf', icon: FileText, label: t.paperTab, disabled: !hasPdf },
+    { key: 'pdf', icon: FileText, label: t.paperTab, disabled: !hasPdf && !b.paper_url },
   ];
 
   return (
@@ -411,7 +415,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
               onClick={() => !disabled && setTab(key as 'info' | 'flowchart' | 'pdf')}
               disabled={disabled}>
               <Icon size={13} />{label}
-              {key === 'pdf' && !hasPdf && <span className="text-[10px] ml-1">{t.paperNA}</span>}
+              {key === 'pdf' && !hasPdf && !b.paper_url && <span className="text-[10px] ml-1">{t.paperNA}</span>}
               {key === 'flowchart' && !hasFlowchart && <span className="text-[10px] ml-1">N/A</span>}
             </button>
           ))}
@@ -710,7 +714,37 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
             </div>
           )}
 
-          {tab === 'pdf' && (
+          {tab === 'pdf' && !hasPdf && (
+            /* No inline PDF — show fallback with external links */
+            <div className={`flex-1 flex flex-col items-center justify-center gap-4 px-8 transition-colors ${isDark ? 'bg-[#0A0A0A]' : 'bg-gray-50'}`} style={{ minHeight: 0 }}>
+              <FileText size={40} className={`${isDark ? 'text-gray-600' : 'text-gray-300'}`} />
+              <div className="text-center">
+                <p className={`text-[14px] font-medium mb-1 transition-colors ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{t.noPdfInline}</p>
+                <p className={`text-[12px] mb-4 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {b.paper_url ? t.noPdfButHasPaper : t.noPdfNoPaper}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                {b.paper_url && (
+                  <a href={b.paper_url} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-4 py-2 text-[13px] rounded-lg text-white transition-colors"
+                    style={{ backgroundColor: '#10A37F' }}>
+                    <ExternalLink size={13} />{t.viewOnPublisher}
+                  </a>
+                )}
+                {b.homepage && (
+                  <a href={b.homepage} target="_blank" rel="noopener noreferrer"
+                    className={`flex items-center gap-1.5 px-4 py-2 text-[13px] rounded-lg border transition-colors ${
+                      isDark ? 'border-gray-700 text-gray-400 hover:border-gray-600 hover:bg-gray-800' : 'border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}>
+                    <ExternalLink size={13} />{t.visitHomepage}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {tab === 'pdf' && hasPdf && (
             /* PDF Reader */
             <div className={`flex-1 flex flex-col transition-colors ${isDark ? 'bg-[#0A0A0A]' : 'bg-gray-50'}`} style={{ minHeight: 0 }}>
               {/* PDF toolbar */}

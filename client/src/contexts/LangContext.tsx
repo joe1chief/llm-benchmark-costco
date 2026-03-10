@@ -17,7 +17,7 @@ export const STRINGS = {
     // HeroStats
     heroTitle: 'LLM Benchmark Costco',
     heroDesc: (total: number, cats: number) =>
-      `收录 ${total} 个大模型评测基准，涵盖 ${cats} 个能力维度。每条记录均附完整论文，支持在线阅读。`,
+      `收录 ${total} 个大模型评测基准，涵盖 ${cats} 个能力维度。大部分记录附完整论文，支持在线阅读。`,
     statBenchmarks: '个基准',
     statDims: '能力维度',
     statFamilies: '基准家族',
@@ -92,6 +92,11 @@ export const STRINGS = {
     downloadPdf: '下载 PDF',
     pdfFooterHint: '如显示异常，请在新标签打开。',
     originalLink: '原始链接',
+    noPdfInline: '该基准无可内嵌的 PDF 论文。',
+    noPdfButHasPaper: '该论文发表在外部平台，请前往原始页面查看。',
+    noPdfNoPaper: '该基准尚无关联论文。',
+    viewOnPublisher: '查看论文原文',
+    visitHomepage: '访问项目主页',
 
     // Home
     noResults: '未找到相关基准',
@@ -140,7 +145,7 @@ export const STRINGS = {
     // HeroStats
     heroTitle: 'LLM Benchmark Costco',
     heroDesc: (total: number, cats: number) =>
-      `A curated database of ${total} LLM evaluation benchmarks across ${cats} capability dimensions. Each entry includes the full paper for inline reading.`,
+      `A curated database of ${total} LLM evaluation benchmarks across ${cats} capability dimensions. Most entries include the full paper for inline reading.`,
     statBenchmarks: 'Benchmarks',
     statDims: 'Capability Dims',
     statFamilies: 'Families',
@@ -215,6 +220,11 @@ export const STRINGS = {
     downloadPdf: 'Download PDF',
     pdfFooterHint: 'If display is broken, open in a new tab.',
     originalLink: 'Original link',
+    noPdfInline: 'No embeddable PDF is available for this benchmark.',
+    noPdfButHasPaper: 'This paper is published on an external platform.',
+    noPdfNoPaper: 'No associated paper is available for this benchmark.',
+    viewOnPublisher: 'View Paper on Publisher',
+    visitHomepage: 'Visit Homepage',
 
     // Home
     noResults: 'No benchmarks found',
