@@ -37,21 +37,21 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const { t, lang } = useLang();
   const isDark = theme === 'dark';
   const isEn = lang === 'en';
-  const widelyTested = (b as any).widely_tested === true;
+  const widelyTested = b.widely_tested === true;
   // Use English difficulty key when in English mode
-  const diffKey = isEn ? ((b as any).difficulty_en || b.difficulty) : b.difficulty;
+  const diffKey = isEn ? (b.difficulty_en || b.difficulty) : b.difficulty;
   const diffColor = DIFFICULTY_COLORS[diffKey] || DIFFICULTY_COLORS[b.difficulty];
 
   // Use English fields when in English mode
-  const intro = isEn ? ((b as any).intro_en || b.intro) : b.intro;
-  const modality = isEn ? ((b as any).modality_en || b.modality) : b.modality;
+  const intro = isEn ? (b.intro_en || b.intro) : b.intro;
+  const modality = isEn ? (b.modality_en || b.modality) : b.modality;
 
   const opennessConfig: Record<string, { icon: typeof Unlock; color: string; label: string }> = {
     'public':        { icon: Unlock,      color: '#10A37F', label: t.publicLabel  },
     'partly public': { icon: ShieldAlert, color: '#F59E0B', label: t.partlyLabel  },
     'in-house':      { icon: Lock,        color: '#EF4444', label: t.privateLabel },
   };
-  const opennessInfo = opennessConfig[b.openness];
+  const opennessInfo = b.openness ? opennessConfig[b.openness] : undefined;
 
   return (
     <article
@@ -69,7 +69,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
         `}
       >
         {/* Top color bar */}
-        <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: b.l1_color }} />
+        <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: b.l1_color || '#999' }} />
 
         {/* Card content */}
         <div className="flex flex-col flex-1 px-5 pt-4 pb-4 gap-3">
@@ -89,7 +89,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
               <span
                 className="font-semibold text-[14px] leading-snug truncate"
                 style={{
-                  color: b.l1_color,
+                  color: b.l1_color || '#999',
                   fontFamily: "'Inter', -apple-system, sans-serif",
                   letterSpacing: '-0.01em',
                 }}
@@ -108,7 +108,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
                   fontFamily: "'Inter', sans-serif",
                 }}
               >
-                {t.difficulty[b.difficulty] || (b as any).difficulty_en || b.difficulty}
+                {t.difficulty[b.difficulty] || b.difficulty_en || b.difficulty}
               </span>
             )}
           </div>
@@ -118,7 +118,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
             className="text-[13px] leading-relaxed line-clamp-2 flex-1"
             style={{ color: isDark ? '#9CA3AF' : '#6B7280' }}
           >
-            {intro || (t as any).noIntro || '—'}
+            {intro || '—'}
           </p>
 
           {/* Meta row */}
@@ -157,13 +157,15 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
 
           {/* Bottom tags */}
           <div className="flex flex-wrap gap-1.5 pt-1 border-t" style={{ borderColor: isDark ? '#242424' : '#F3F4F6' }}>
-            <span
-              className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md"
-              style={{ backgroundColor: b.l1_color + (isDark ? '1A' : '12'), color: b.l1_color }}
-            >
-              <Layers size={9} />
-              {t.l1[b.l1] || b.l1}
-            </span>
+            {b.l1 && (
+              <span
+                className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md"
+                style={{ backgroundColor: (b.l1_color || '#999') + (isDark ? '1A' : '12'), color: b.l1_color || '#999' }}
+              >
+                <Layers size={9} />
+                {t.l1[b.l1] || b.l1}
+              </span>
+            )}
             {b.family && (
               <span
                 className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md"
@@ -177,7 +179,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
                 className="inline-flex items-center text-[11px] px-2 py-0.5 rounded-md"
                 style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', color: isDark ? '#9CA3AF' : '#9CA3AF' }}
               >
-                {modality.split('+')[0].trim()}
+                {(modality || '').split(/[+,，]/)[0].trim() || modality}
               </span>
             )}
           </div>

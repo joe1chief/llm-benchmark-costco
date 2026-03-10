@@ -18,7 +18,7 @@ interface Props {
   onSelectBenchmark: (b: Benchmark) => void;
 }
 
-function InfoRow({ label, value, isDark }: { label: string; value: string; isDark: boolean }) {
+function InfoRow({ label, value, isDark }: { label: string; value: string | undefined | null; isDark: boolean }) {
   if (!value || value === 'nan' || value === 'None' || value === 'NaN' || value === 'N/A' || value === 'Not mentioned') return null;
   return (
     <div className={`flex gap-3 py-2.5 border-b last:border-0 transition-colors ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
@@ -89,7 +89,10 @@ function MermaidChart({ code, isDark }: { code: string; isDark: boolean }) {
   const [svgContent, setSvgContent] = useState<string>('');
 
   useEffect(() => {
-    if (!code) return;
+    if (!code) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     setSvgContent('');
@@ -265,18 +268,18 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
   const currentStrategy = strategies[strategyIndex];
   const embedUrl = currentStrategy?.url || '';
 
-  // Flowchart data
+  // Flowchart data — safely handle null/undefined mermaid_flowchart
   const flowchartCode = isEn
-    ? ((b as any).flowchart_en || (b as any).flowchart || '')
-    : ((b as any).flowchart_zh || (b as any).flowchart_en || (b as any).flowchart || '');
+    ? (b.flowchart_en || b.mermaid_flowchart || '')
+    : (b.flowchart_zh || b.flowchart_en || b.mermaid_flowchart || '');
   const hasFlowchart = !!flowchartCode;
 
   const opennessConfig: Record<string, { icon: typeof Unlock; color: string; label: string; bg: string; bgDark: string }> = {
     'public':        { icon: Unlock,      color: '#10A37F', label: t.publicLabel,  bg: 'bg-emerald-50 border-emerald-200', bgDark: 'bg-emerald-950/30 border-emerald-900/50' },
     'partly public': { icon: ShieldAlert, color: '#F59E0B', label: t.partlyLabel,  bg: 'bg-amber-50 border-amber-200',    bgDark: 'bg-amber-950/30 border-amber-900/50' },
-    'in-house':      { icon: Lock,        color: '#EF4444', label: t.inHouse,      bg: 'bg-red-50 border-red-200',        bgDark: 'bg-red-950/30 border-red-900/50' },
+    'in-house':      { icon: Lock,        color: '#EF4444', label: t.privateLabel, bg: 'bg-red-50 border-red-200',        bgDark: 'bg-red-950/30 border-red-900/50' },
   };
-  const opennessInfo = opennessConfig[b.openness];
+  const opennessInfo = b.openness ? opennessConfig[b.openness] : undefined;
 
   const familyMembers = b.family
     ? allBenchmarks.filter(x => x.family === b.family && x.id !== b.id)
@@ -334,7 +337,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
       >
         {/* Header */}
         <div className={`flex items-start gap-3 px-6 py-5 border-b shrink-0 transition-colors ${borderColor} ${drawerBg}`}>
-          <div className="w-1 h-12 rounded-full shrink-0 mt-0.5" style={{ backgroundColor: b.l1_color }} />
+          <div className="w-1 h-12 rounded-full shrink-0 mt-0.5" style={{ backgroundColor: b.l1_color || '#999' }} />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
               <h2 className={`text-[17px] font-semibold leading-snug transition-colors ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
@@ -347,13 +350,15 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
               )}
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full"
-                style={{ backgroundColor: b.l1_color + '22', color: b.l1_color, fontFamily: 'var(--font-mono)' }}>
-                <Layers size={9} />{t.l1[b.l1] || b.l1}
-              </span>
+              {b.l1 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: (b.l1_color || '#999') + '22', color: b.l1_color || '#999', fontFamily: 'var(--font-mono)' }}>
+                  <Layers size={9} />{t.l1[b.l1] || b.l1}
+                </span>
+              )}
               {b.l2 && b.l2 !== b.l1 && b.l2 !== 'nan' && (
                 <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-0.5 rounded-full transition-colors ${isDark ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}
-                  style={{ fontFamily: 'var(--font-mono)' }}>{isEn ? ((b as any).l2_en || b.l2) : b.l2}</span>
+                  style={{ fontFamily: 'var(--font-mono)' }}>{isEn ? (b.l2_en || b.l2) : b.l2}</span>
               )}
               {b.difficulty && b.difficulty !== 'nan' && (
                 <span className={`inline-flex items-center text-[11px] font-medium px-2.5 py-0.5 rounded-full border transition-colors ${isDark ? 'bg-orange-950/40 text-orange-400 border-orange-900/50' : 'bg-orange-50 text-orange-600 border-orange-100'}`}
@@ -425,7 +430,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
 
               {/* Intro */}
               <p className={`text-[14px] leading-relaxed transition-colors ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                {isEn ? ((b as any).intro_en || b.intro) : b.intro}
+                {isEn ? (b.intro_en || b.intro) : b.intro}
               </p>
 
               {/* Action buttons */}
@@ -484,10 +489,10 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                 <div className="px-4">
                   <InfoRow label={t.fieldPublished} value={b.published} isDark={isDark} />
                   <InfoRow label={t.fieldOrg}       value={b.org}       isDark={isDark} />
-                  <InfoRow label={t.fieldModality}  value={isEn ? ((b as any).modality_en || b.modality) : b.modality}  isDark={isDark} />
-                  <InfoRow label={t.fieldLanguage}  value={isEn ? ((b as any).language_en || b.language) : b.language}  isDark={isDark} />
-                  <InfoRow label={t.fieldTaskType}  value={isEn ? ((b as any).task_type_en || b.task_type) : b.task_type} isDark={isDark} />
-                  <InfoRow label={t.fieldScale}     value={isEn ? ((b as any).scale_en || b.scale) : b.scale}     isDark={isDark} />
+                  <InfoRow label={t.fieldModality}  value={isEn ? (b.modality_en || b.modality) : b.modality}  isDark={isDark} />
+                  <InfoRow label={t.fieldLanguage}  value={isEn ? (b.language_en || b.language) : b.language}  isDark={isDark} />
+                  <InfoRow label={t.fieldTaskType}  value={isEn ? (b.task_type_en || b.task_type) : b.task_type} isDark={isDark} />
+                  <InfoRow label={t.fieldScale}     value={isEn ? (b.scale_en || b.scale) : b.scale}     isDark={isDark} />
                 </div>
               </div>
 
@@ -497,9 +502,9 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                   <span className={`text-[11px] font-semibold uppercase tracking-wider transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t.sectionEval}</span>
                 </div>
                 <div className="px-4">
-                  <InfoRow label={t.fieldBuildMethod}  value={isEn ? ((b as any).build_method_en || b.build_method) : b.build_method} isDark={isDark} />
-                  <InfoRow label={t.fieldMetric}       value={isEn ? ((b as any).metric_en || b.metric) : b.metric}       isDark={isDark} />
-                  <InfoRow label={t.fieldEvalFeature}  value={isEn ? ((b as any).eval_feature_en || b.eval_feature) : b.eval_feature} isDark={isDark} />
+                  <InfoRow label={t.fieldBuildMethod}  value={isEn ? (b.build_method_en || b.build_method) : b.build_method} isDark={isDark} />
+                  <InfoRow label={t.fieldMetric}       value={isEn ? (b.metric_en || b.metric) : b.metric}       isDark={isDark} />
+                  <InfoRow label={t.fieldEvalFeature}  value={isEn ? (b.eval_feature_en || b.eval_feature) : b.eval_feature} isDark={isDark} />
                   <InfoRow label={t.fieldDataAccess}   value={opennessInfo?.label || b.openness} isDark={isDark} />
                   <div className="flex gap-3 py-2.5">
                     <span className={`text-[12px] w-24 shrink-0 pt-0.5 transition-colors ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t.fieldLeaderboard}</span>
@@ -529,7 +534,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: member.l1_color }} />
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: member.l1_color || '#999' }} />
                           <span className={`text-[13px] font-medium truncate group-hover/member:text-[#10A37F] transition-colors ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                             {member.name}
                           </span>
@@ -559,8 +564,8 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                       // Compute shared traits
                       const traits: string[] = [];
                       if (rel.l1 === b.l1) traits.push(isEn ? (t.l1[rel.l1] || rel.l1) : (t.l1[rel.l1] || rel.l1));
-                      if (rel.l2 && rel.l2 === b.l2 && rel.l2 !== rel.l1) traits.push(isEn ? ((rel as any).l2_en || rel.l2) : rel.l2);
-                      if (rel.modality && rel.modality === b.modality) traits.push(isEn ? ((rel as any).modality_en || rel.modality) : rel.modality);
+                      if (rel.l2 && rel.l2 === b.l2 && rel.l2 !== rel.l1) traits.push(isEn ? (rel.l2_en || rel.l2) : rel.l2);
+                      if (rel.modality && rel.modality === b.modality) traits.push(isEn ? (rel.modality_en || rel.modality) : rel.modality);
                       if (rel.difficulty && rel.difficulty === b.difficulty) traits.push(t.difficulty[rel.difficulty] || rel.difficulty);
 
                       return (
@@ -572,7 +577,7 @@ export default function BenchmarkDrawer({ benchmark: b, allBenchmarks, onClose, 
                           }`}
                         >
                           <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                            <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: rel.l1_color }} />
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: rel.l1_color || '#999' }} />
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className={`text-[13px] font-medium group-hover/rel:text-[#10A37F] transition-colors ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>

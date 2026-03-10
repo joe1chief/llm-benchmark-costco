@@ -41,11 +41,13 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
     if (filters.search.trim()) {
       const q = filters.search.toLowerCase();
       result = result.filter(b =>
-        b.name.toLowerCase().includes(q) ||
-        b.intro.toLowerCase().includes(q) ||
-        b.org.toLowerCase().includes(q) ||
-        b.l1.toLowerCase().includes(q) ||
-        b.l2.toLowerCase().includes(q) ||
+        (b.name || '').toLowerCase().includes(q) ||
+        (b.intro || '').toLowerCase().includes(q) ||
+        (b.intro_en || '').toLowerCase().includes(q) ||
+        (b.org || '').toLowerCase().includes(q) ||
+        (b.l1 || '').toLowerCase().includes(q) ||
+        (b.l2 || '').toLowerCase().includes(q) ||
+        (b.l2_en || '').toLowerCase().includes(q) ||
         (b.family && b.family.toLowerCase().includes(q))
       );
     }
@@ -67,7 +69,7 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
         'Frontier': '前沿', 'Expert': '专家', 'Advanced': '进阶', 'Basic': '基础', 'Intermediate': '中等',
       };
       result = result.filter(b => {
-        const bDiffEn = (b as any).difficulty_en || b.difficulty;
+        const bDiffEn = b.difficulty_en || b.difficulty;
         return b.difficulty === filters.difficulty ||
           bDiffEn === filters.difficulty ||
           DIFF_MAP[b.difficulty] === filters.difficulty ||
@@ -87,14 +89,14 @@ export function useFilteredBenchmarks(data: Benchmark[], filters: Filters) {
 
     // 广泛采用筛选
     if (filters.widelyTested) {
-      result = result.filter(b => (b as any).widely_tested === true);
+      result = result.filter(b => b.widely_tested === true);
     }
 
     // 排序
     if (filters.sort === 'newest') {
-      result.sort((a, b) => b.published.localeCompare(a.published));
+      result.sort((a, b) => (b.published || '').localeCompare(a.published || ''));
     } else if (filters.sort === 'oldest') {
-      result.sort((a, b) => a.published.localeCompare(b.published));
+      result.sort((a, b) => (a.published || '').localeCompare(b.published || ''));
     } else if (filters.sort === 'name') {
       result.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
     }

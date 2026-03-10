@@ -16,7 +16,7 @@ export default function HeroStats({ data }: Props) {
   const total        = data.length;
   const categories   = new Set(data.map(b => b.l1)).size;
   const families     = new Set(data.filter(b => b.family).map(b => b.family)).size;
-  const widelyTested = data.filter(b => (b as any).widely_tested).length;
+  const widelyTested = data.filter(b => b.widely_tested).length;
 
   const stats = [
     { value: total,        label: t.statBenchmarks, color: '#10A37F' },

@@ -22,12 +22,32 @@ export interface Benchmark {
   scale: string;
   has_leaderboard: boolean;
   pdf_filename: string;
-  // New fields
+  // Family & variant
   family: string;         // Family name, empty if standalone
   variant: string;        // Variant/version name within family
   widely_tested: boolean; // Medal: widely tested by major LLM tech reports
   related_benchmarks: string[]; // Related benchmark names
   homepage: string;       // Official homepage URL
+  // English i18n fields
+  l1_en?: string;
+  l2_en?: string;
+  difficulty_en?: string;
+  openness_en?: string;
+  modality_en?: string;
+  task_type_en?: string;
+  build_method_en?: string;
+  eval_feature_en?: string;
+  intro_en?: string;
+  language_en?: string;
+  scale_en?: string;
+  metric_en?: string;
+  // Flowchart fields
+  mermaid_flowchart?: string | null;
+  flowchart_en?: string;
+  flowchart_zh?: string;
+  // Default taxonomy fields
+  default_l1?: string;
+  default_l2?: string;
 }
 
 export const L1_CATEGORIES = [

@@ -39,13 +39,13 @@ export default function Home() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const filtered = useFilteredBenchmarks(data, filters);
-  const widelyTestedCount = useMemo(() => data.filter(b => (b as any).widely_tested === true).length, [data]);
+  const widelyTestedCount = useMemo(() => data.filter(b => b.widely_tested === true).length, [data]);
 
   const counts = useMemo(() => {
     const base = data.filter(b => {
       if (filters.search.trim()) {
         const q = filters.search.toLowerCase();
-        return b.name.toLowerCase().includes(q) || b.intro.toLowerCase().includes(q) || b.org.toLowerCase().includes(q);
+        return (b.name || '').toLowerCase().includes(q) || (b.intro || '').toLowerCase().includes(q) || (b.org || '').toLowerCase().includes(q);
       }
       return true;
     });

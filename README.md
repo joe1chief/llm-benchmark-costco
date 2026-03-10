@@ -1,13 +1,16 @@
-# Benchmark Hub
+# LLM Benchmark Costco
 
-> 340 个大模型评测基准的完整数据库，OpenAI 风格展示界面，支持搜索、筛选和在线阅读完整论文。
+> 378 个大模型评测基准的完整数据库，OpenAI 风格展示界面，支持搜索、筛选、在线阅读完整论文和查看构建流程图。
 
 ## 功能特性
 
-- **340 个 Benchmark** 完整收录，涵盖 12 个能力维度
+- **378 个 Benchmark** 完整收录，涵盖 12 个能力维度
 - **实时搜索**：按名称、机构、分类即时过滤
-- **多维筛选**：L1 分类、年份、难度级别
+- **多维筛选**：L1 分类、年份、难度级别、公开度
 - **在线 PDF 阅读**：点击卡片直接阅读完整论文
+- **构建流程图**：支持查看基准测试的 Mermaid 构建流程图
+- **中英双语**：支持中英文界面和数据展示切换
+- **深色模式**：支持浅色/深色主题切换
 - **OpenAI 风格**：极简白底设计，专业研究人员友好
 
 ## 快速开始
@@ -50,18 +53,18 @@ npx gh-pages -d dist-ghpages
 
 ### 配置子路径（重要）
 
-如果部署在子路径（如 `https://username.github.io/benchmark-hub/`），需要修改 `vite.ghpages.config.ts`：
+如果部署在子路径（如 `https://username.github.io/llm-benchmark-costco/`），需要修改 `vite.ghpages.config.ts`：
 
 ```ts
 // 将 base 从 './' 改为你的仓库名
-base: '/benchmark-hub/',
+base: '/llm-benchmark-costco/',
 ```
 
 如果部署在根路径（如 `https://username.github.io/`），保持 `base: './'` 即可。
 
-## 更新 PDF 数据
+## 更新数据
 
-PDF 论文通过 CDN URL 访问。更新数据时，修改 `client/public/benchmarks.json` 中的 `pdf_cdn_url` 字段即可。
+最新数据存储在 `client/public/benchmarks.json` 中。更新数据时，请确保数据结构与 `client/src/types/benchmark.ts` 中的类型定义保持一致。
 
 ## 技术栈
 
@@ -70,18 +73,19 @@ PDF 论文通过 CDN URL 访问。更新数据时，修改 `client/public/benchm
 - **Vite 7**
 - **Wouter**（轻量路由）
 - **Lucide React**（图标）
+- **Mermaid**（流程图渲染）
 
 ## 目录结构
 
 ```
-benchmark-hub/
+llm-benchmark-costco/
 ├── client/
 │   ├── public/
-│   │   └── benchmarks.json      # 340 个 Benchmark 数据
+│   │   └── benchmarks.json      # 378 个 Benchmark 数据
 │   └── src/
 │       ├── components/
 │       │   ├── BenchmarkCard.tsx  # 胶囊卡片
-│       │   ├── BenchmarkDrawer.tsx # 详情抽屉 + PDF 阅读器
+│       │   ├── BenchmarkDrawer.tsx # 详情抽屉 + PDF 阅读器 + 流程图
 │       │   ├── FilterBar.tsx      # 筛选栏
 │       │   ├── HeroStats.tsx      # 统计区
 │       │   └── Navbar.tsx         # 顶部导航
