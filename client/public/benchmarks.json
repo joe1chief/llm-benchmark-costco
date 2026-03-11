@@ -2,7 +2,7 @@
   {
     "id": "CI-TEST-001",
     "name": "CI-Test-Benchmark",
-    "l1": "通用语言理解",
+    "l1": "通用语言能力",
     "l1_en": "General Language",
     "l1_color": "#10A37F",
     "l2": "综合推理",
@@ -19,7 +19,7 @@
     "build_method_en": "Automated Test",
     "metric": "CI Pass Rate",
     "metric_en": "CI Pass Rate",
-    "openness": "公开",
+    "openness": "Public",
     "openness_en": "Public",
     "modality": "文本",
     "modality_en": "Text",
