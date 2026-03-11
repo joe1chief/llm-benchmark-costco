@@ -1,10 +1,33 @@
-// LLM Benchmark Costco — HeroStats (English)
+// LLM Benchmark Costco — HeroStats (English + lazy-cow-47 title fx + young-walrus-64 flame)
 import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface Props {
   data: Benchmark[];
+}
+
+/** young-walrus-64 火焰球 SVG Loader（使用项目原配色 #10A37F） */
+function FlameLoader() {
+  return (
+    <div className="flame-loader" aria-hidden="true">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+        <defs>
+          <mask id="flame-clipping">
+            <polygon points="0,0 100,0 100,100 0,100" fill="black" />
+            <polygon points="25,25 75,25 50,75" fill="white" />
+            <polygon points="50,25 75,75 25,75" fill="white" />
+            <polygon points="35,35 65,35 50,65" fill="white" />
+            <polygon points="35,35 65,35 50,65" fill="white" />
+            <polygon points="35,35 65,35 50,65" fill="white" />
+            <polygon points="35,35 65,35 50,65" fill="white" />
+            <polygon points="35,35 65,35 50,65" fill="white" />
+          </mask>
+        </defs>
+      </svg>
+      <div className="flame-box" />
+    </div>
+  );
 }
 
 export default function HeroStats({ data }: Props) {
@@ -29,23 +52,32 @@ export default function HeroStats({ data }: Props) {
       style={{ borderColor: isDark ? '#1F1F1F' : '#F3F4F6' }}
     >
       <div className="container py-10">
-        {/* Title */}
+        {/* Title row — lazy-cow-47 特效 + 火焰球装饰 */}
         <div className="mb-8">
-          <h1
-            className="text-[30px] font-semibold tracking-tight mb-2.5"
-            style={{
-              fontFamily: "'Inter', -apple-system, sans-serif",
-              letterSpacing: '-0.02em',
-              background: isDark
-                ? 'linear-gradient(90deg, #F9FAFB 0%, #D1D5DB 100%)'
-                : 'linear-gradient(90deg, #111827 0%, #374151 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            LLM Benchmark Costco
-          </h1>
+          <div className="flex items-center gap-4 mb-2.5">
+            {/* young-walrus-64 火焰球 */}
+            <div
+              style={{
+                opacity: isDark ? 1 : 0.55,
+                transition: 'opacity 0.3s ease',
+                flexShrink: 0,
+              }}
+            >
+              <FlameLoader />
+            </div>
+
+            {/* 标题 — lazy-cow-47 特效 */}
+            <h1
+              className="hero-title-fx text-[30px] font-semibold tracking-tight"
+              style={{
+                fontFamily: "'Inter', -apple-system, sans-serif",
+                color: isDark ? '#34D399' : '#10A37F',
+              }}
+            >
+              LLM Benchmark Costco
+            </h1>
+          </div>
+
           <p
             className="text-[14px] max-w-xl leading-relaxed"
             style={{

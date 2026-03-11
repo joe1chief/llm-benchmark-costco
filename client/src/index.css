@@ -219,51 +219,56 @@
   }
 
   /* ============================================
-     卡片动态荧光特效 (Neon Glow Effect)
+     卡片动态荧光特效 v2 (heavy-elephant-39 风格)
+     参考: uiverse.io/alexruix/heavy-elephant-39
+     — 底部模糊光晕 + 鼠标跟随边框荧光 + 原配色
      ============================================ */
 
-  /* 鼠标跟随荧光光晕 — 通过 CSS 变量 --mx / --my 驱动 */
+  /* 卡片容器：底部模糊光晕（heavy-elephant-39 核心特征） */
   .benchmark-card-glow {
     position: relative;
     isolation: isolate;
   }
 
+  /* 底部扩散光晕（::after 用于底部模糊投影，参考 heavy-elephant-39 的 .card::after） */
+  .benchmark-card-glow::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    height: 100%;
+    width: 100%;
+    transform: scale(0.85);
+    filter: blur(22px);
+    background: rgba(16, 163, 127, 0);
+    transition: background 0.5s ease, opacity 0.5s ease;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* hover 时底部光晕亮起（使用项目原配色 #10A37F） */
+  .benchmark-card-glow:hover::after {
+    background: rgba(16, 163, 127, 0.18);
+  }
+
+  /* 鼠标跟随荧光边框（::before，通过 CSS 变量 --mx / --my 驱动） */
   .benchmark-card-glow::before {
     content: '';
     position: absolute;
     inset: -1px;
     border-radius: inherit;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.35s ease;
     background: radial-gradient(
-      600px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(16, 163, 127, 0.15),
-      transparent 60%
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .benchmark-card-glow:hover::before {
-    opacity: 1;
-  }
-
-  /* 荧光边框扫光 */
-  .benchmark-card-glow::after {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    background: radial-gradient(
-      400px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(16, 163, 127, 0.4),
+      500px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(16, 163, 127, 0.38),
       transparent 55%
     );
     pointer-events: none;
     z-index: 0;
-    /* 仅在边框区域显示 */
+    /* 仅在边框区域显示（mask 技术） */
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -272,25 +277,21 @@
     padding: 1px;
   }
 
-  .benchmark-card-glow:hover::after {
+  .benchmark-card-glow:hover::before {
     opacity: 1;
   }
 
-  /* 暗色模式荧光增强 */
+  /* 暗色模式增强 */
   .dark .benchmark-card-glow::before {
     background: radial-gradient(
-      600px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(16, 163, 127, 0.20),
-      transparent 60%
-    );
-  }
-
-  .dark .benchmark-card-glow::after {
-    background: radial-gradient(
-      400px circle at var(--mx, 50%) var(--my, 50%),
+      500px circle at var(--mx, 50%) var(--my, 50%),
       rgba(16, 163, 127, 0.55),
       transparent 55%
     );
+  }
+
+  .dark .benchmark-card-glow:hover::after {
+    background: rgba(16, 163, 127, 0.25);
   }
 
   /* 卡片内容层级确保在光效之上 */
@@ -308,8 +309,8 @@
     }
     50% {
       box-shadow:
-        0 0 12px rgba(245, 158, 11, 0.35),
-        0 0 24px rgba(245, 158, 11, 0.15);
+        0 0 14px rgba(245, 158, 11, 0.40),
+        0 0 28px rgba(245, 158, 11, 0.18);
     }
   }
 
@@ -320,11 +321,52 @@
   /* 卡片顶部色条荧光扩散 */
   @keyframes colorBarGlow {
     0%, 100% { opacity: 1; filter: blur(0px); }
-    50%       { opacity: 1; filter: blur(1.5px) brightness(1.4); }
+    50%       { opacity: 1; filter: blur(1.5px) brightness(1.5); }
   }
 
   .benchmark-card-glow:hover .card-color-bar {
     animation: colorBarGlow 1.8s ease-in-out infinite;
+  }
+
+  /* ============================================
+     荧光扫描线 — 卡片 hover 时的扫光效果
+     ============================================ */
+
+  @keyframes scanLine {
+    0%   { transform: translateY(-100%) skewY(-3deg); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(400%) skewY(-3deg); opacity: 0; }
+  }
+
+  .benchmark-card-glow .scan-line {
+    position: absolute;
+    inset-inline: 0;
+    height: 30%;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(16, 163, 127, 0.06) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(-100%) skewY(-3deg);
+  }
+
+  .benchmark-card-glow:hover .scan-line {
+    animation: scanLine 2.4s ease-in-out infinite;
+  }
+
+  /* 暗色模式扫描线增强 */
+  .dark .benchmark-card-glow .scan-line {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(16, 163, 127, 0.14) 50%,
+      transparent 100%
+    );
   }
 
   /* ============================================
@@ -376,43 +418,239 @@
   }
 
   /* ============================================
-     荧光扫描线 — 卡片 hover 时的扫光效果
+     "Ant AQ eval team" 流光特效
+     — 与 Logo 同风格，颜色更低调
      ============================================ */
 
-  @keyframes scanLine {
-    0%   { transform: translateY(-100%) skewY(-3deg); opacity: 0; }
-    10%  { opacity: 0.6; }
-    90%  { opacity: 0.6; }
-    100% { transform: translateY(400%) skewY(-3deg); opacity: 0; }
+  @keyframes poweredByShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
   }
 
-  .benchmark-card-glow .scan-line {
+  .powered-by-shimmer {
+    background: linear-gradient(
+      90deg,
+      #10A37F66 0%,
+      #1A73E888 20%,
+      #7C3AED99 40%,
+      #10A37Fcc 50%,
+      #7C3AED99 60%,
+      #1A73E888 80%,
+      #10A37F66 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: poweredByShimmer 5s linear infinite;
+    font-weight: 600;
+  }
+
+  /* 亮色模式下颜色更深一点，保证可读性 */
+  .powered-by-shimmer-light {
+    background: linear-gradient(
+      90deg,
+      #10A37F 0%,
+      #1A73E8 20%,
+      #7C3AED 40%,
+      #10A37F 50%,
+      #7C3AED 60%,
+      #1A73E8 80%,
+      #10A37F 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: poweredByShimmer 5s linear infinite;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  /* ============================================
+     Hero 标题 lazy-cow-47 特效
+     参考: uiverse.io/Smit-Prajapati/lazy-cow-47
+     — 网格背景 + 径向渐变边框 + 主题适配
+     ============================================ */
+
+  /* 亮色模式 */
+  .hero-title-fx {
+    --fx-color: #10A37F;
+    --fx-bg-color: rgba(16, 213, 127, 0.12);
+    --fx-pattern-color: rgba(16, 163, 127, 0.06);
+    --fx-text-color: #10A37F;
+
+    display: inline-block;
+    cursor: default;
+    letter-spacing: -0.02em;
+    background:
+      radial-gradient(
+        ellipse at center,
+        var(--fx-bg-color) 0%,
+        rgba(0, 0, 0, 0) 70%
+      ),
+      linear-gradient(var(--fx-pattern-color) 1px, transparent 1px),
+      linear-gradient(to right, var(--fx-pattern-color) 1px, transparent 1px);
+    background-size: cover, 18px 18px, 18px 18px;
+    background-position: center center, center center, center center;
+    border-image: radial-gradient(
+      ellipse at center,
+      var(--fx-color) 0%,
+      rgba(0, 0, 0, 0) 100%
+    ) 1;
+    border-width: 1px 0 1px 0;
+    border-style: solid;
+    color: var(--fx-text-color);
+    padding: 0.25rem 0.5rem;
+    font-weight: 700;
+    transition: background-size 0.3s ease-in-out;
+    /* 文字颜色通过 gradient 覆盖 */
+    background-clip: padding-box;
+  }
+
+  .hero-title-fx:hover {
+    background-size: cover, 12px 12px, 12px 12px;
+  }
+
+  /* 暗色模式适配 */
+  .dark .hero-title-fx {
+    --fx-color: #10A37F;
+    --fx-bg-color: rgba(16, 163, 127, 0.18);
+    --fx-pattern-color: rgba(16, 163, 127, 0.08);
+    --fx-text-color: #34D399;
+  }
+
+  /* ============================================
+     young-walrus-64 火焰球 Loader 特效
+     参考: uiverse.io/andrew-manzyk/young-walrus-64
+     — 用于 Hero 区域装饰
+     ============================================ */
+
+  .flame-loader {
+    --color-one: #10A37F;
+    --color-two: #0D8F6F;
+    --color-three: rgba(16, 163, 127, 0.5);
+    --color-four: rgba(13, 143, 111, 0.5);
+    --color-five: rgba(16, 163, 127, 0.25);
+    --time-animation: 2s;
+    --size: 0.7;
+    position: relative;
+    border-radius: 50%;
+    transform: scale(var(--size));
+    box-shadow:
+      0 0 25px 0 var(--color-three),
+      0 20px 50px 0 var(--color-four);
+    animation: flameColorize calc(var(--time-animation) * 3) ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  .flame-loader::before {
+    content: "";
     position: absolute;
-    inset-inline: 0;
-    height: 30%;
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(16, 163, 127, 0.06) 50%,
-      transparent 100%
-    );
-    pointer-events: none;
-    z-index: 2;
-    opacity: 0;
-    transform: translateY(-100%) skewY(-3deg);
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border-top: solid 1px var(--color-one);
+    border-bottom: solid 1px var(--color-two);
+    background: linear-gradient(180deg, var(--color-five), var(--color-four));
+    box-shadow:
+      inset 0 10px 10px 0 var(--color-three),
+      inset 0 -10px 10px 0 var(--color-four);
   }
 
-  .benchmark-card-glow:hover .scan-line {
-    animation: scanLine 2.4s ease-in-out infinite;
-  }
-
-  /* 暗色模式扫描线增强 */
-  .dark .benchmark-card-glow .scan-line {
+  .flame-loader .flame-box {
+    width: 100px;
+    height: 100px;
     background: linear-gradient(
       180deg,
-      transparent 0%,
-      rgba(16, 163, 127, 0.12) 50%,
-      transparent 100%
+      var(--color-one) 30%,
+      var(--color-two) 70%
     );
+    mask: url(#flame-clipping);
+    -webkit-mask: url(#flame-clipping);
+  }
+
+  .flame-loader svg {
+    position: absolute;
+  }
+
+  .flame-loader svg #flame-clipping {
+    filter: contrast(15);
+    animation: flameRoundness calc(var(--time-animation) / 2) linear infinite;
+  }
+
+  .flame-loader svg #flame-clipping polygon {
+    filter: blur(7px);
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(1) {
+    transform-origin: 75% 25%;
+    transform: rotate(90deg);
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(2) {
+    transform-origin: 50% 50%;
+    animation: flameRotation var(--time-animation) linear infinite reverse;
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(3) {
+    transform-origin: 50% 60%;
+    animation: flameRotation var(--time-animation) linear infinite;
+    animation-delay: calc(var(--time-animation) / -3);
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(4) {
+    transform-origin: 40% 40%;
+    animation: flameRotation var(--time-animation) linear infinite reverse;
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(5) {
+    transform-origin: 40% 40%;
+    animation: flameRotation var(--time-animation) linear infinite reverse;
+    animation-delay: calc(var(--time-animation) / -2);
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(6) {
+    transform-origin: 60% 40%;
+    animation: flameRotation var(--time-animation) linear infinite;
+  }
+
+  .flame-loader svg #flame-clipping polygon:nth-child(7) {
+    transform-origin: 60% 40%;
+    animation: flameRotation var(--time-animation) linear infinite;
+    animation-delay: calc(var(--time-animation) / -1.5);
+  }
+
+  @keyframes flameRotation {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes flameRoundness {
+    0%   { filter: contrast(15); }
+    20%  { filter: contrast(3); }
+    40%  { filter: contrast(3); }
+    60%  { filter: contrast(15); }
+    100% { filter: contrast(15); }
+  }
+
+  @keyframes flameColorize {
+    0%   { filter: hue-rotate(0deg); }
+    20%  { filter: hue-rotate(-15deg); }
+    40%  { filter: hue-rotate(-30deg); }
+    60%  { filter: hue-rotate(-45deg); }
+    80%  { filter: hue-rotate(-20deg); }
+    100% { filter: hue-rotate(0deg); }
+  }
+
+  /* 暗色模式火焰球颜色增强 */
+  .dark .flame-loader {
+    --color-one: #10A37F;
+    --color-two: #34D399;
+    --color-three: rgba(16, 163, 127, 0.65);
+    --color-four: rgba(52, 211, 153, 0.55);
+    --color-five: rgba(16, 163, 127, 0.30);
   }
 }

@@ -1,4 +1,4 @@
-// LLM Benchmark Costco — Navbar (i18n + Logo Shimmer Effect)
+// LLM Benchmark Costco — Navbar (i18n + Logo Shimmer + powered-by shimmer)
 import React from 'react';
 import { Search, X, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -147,7 +147,7 @@ export default function Navbar({ search, onSearchChange, total, filtered }: Prop
         </div>
       </div>
 
-      {/* Powered by bar */}
+      {/* Powered by bar — "Ant AQ eval team" 流光特效 */}
       <div
         className="border-t transition-colors duration-200"
         style={{ borderColor: isDark ? '#1A1A1A' : '#F9FAFB' }}
@@ -159,7 +159,8 @@ export default function Navbar({ search, onSearchChange, total, filtered }: Prop
               style={{ fontFamily: "'Inter', sans-serif", color: isDark ? '#3D3D3D' : '#D1D5DB' }}
             >
               {t.poweredBy}{' '}
-              <span style={{ fontWeight: 600, color: isDark ? '#10A37F66' : '#10A37F88' }}>
+              {/* 流光特效：暗色/亮色分别使用不同亮度的 shimmer */}
+              <span className={isDark ? 'powered-by-shimmer' : 'powered-by-shimmer-light'}>
                 Ant AQ eval team
               </span>
               {t.poweredBySuffix}
