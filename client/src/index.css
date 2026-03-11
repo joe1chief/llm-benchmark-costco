@@ -219,17 +219,26 @@
   }
 
   /* ============================================
-     卡片动态荧光特效 v3 — 严格还原 heavy-elephant-39
-     参考: uiverse.io/alexruix/heavy-elephant-39
+     卡片动态荧光特效 v4 — 自然发光边框
      原理：
-       - 卡片外层 (.benchmark-card-glow) 作为渐变"边框"层
-       - 内层 (.card-inner) 是深色/白色内容区
-       - ::after 在 z-index: -1，top: 30px，blur(25px)，hover 时 opacity → 0
+       - 外层作为渐变边框（单色渐变，更自然）
+       - 内层深色/白色内容区
+       - ::before 负责底部扩散光晕（多层模糊，hover 时增强）
+       - ::after 负责 hover 时的内侧边缘发光
      ============================================ */
 
-  /* 外层：渐变背景充当边框，padding: 1px */
+  /* 外层：渐变边框，单色系更自然 */
   .benchmark-card-glow {
-    --card-gradient: linear-gradient(135deg, #10A37F 0%, #1A73E8 50%, #7C3AED 100%);
+    --card-color: #10A37F;
+    --card-color-dim: rgba(16, 163, 127, 0.35);
+    --card-color-glow: rgba(16, 163, 127, 0.15);
+    --card-gradient: linear-gradient(
+      180deg,
+      rgba(16, 163, 127, 0.9) 0%,
+      rgba(16, 163, 127, 0.3) 40%,
+      rgba(16, 163, 127, 0.1) 70%,
+      rgba(16, 163, 127, 0.5) 100%
+    );
     position: relative;
     padding: 1px;
     border-radius: 0;
@@ -237,38 +246,76 @@
     overflow: visible;
     cursor: pointer;
     isolation: isolate;
+    transition: transform 0.3s ease, box-shadow 0.4s ease;
   }
 
-  /* 底部模糊光晕（heavy-elephant-39 核心：hover 时消失） */
-  .benchmark-card-glow::after {
+  /* hover 时卡片整体轻微上浮 + 外发光 */
+  .benchmark-card-glow:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 20px rgba(16, 163, 127, 0.18),
+      0 8px 32px rgba(16, 163, 127, 0.10);
+  }
+
+  /* 底部扩散光晕 — 静止时淡显，hover 时增强 */
+  .benchmark-card-glow::before {
     content: '';
     position: absolute;
-    top: 20px;
-    left: 4px;
-    right: 4px;
+    inset: 0;
     z-index: -1;
-    height: 100%;
-    width: calc(100% - 8px);
-    transform: scale(0.85);
-    filter: blur(10px);
-    background: var(--card-gradient);
-    transition: opacity 0.5s ease;
+    background: radial-gradient(
+      ellipse 80% 60% at 50% 110%,
+      rgba(16, 163, 127, 0.22) 0%,
+      rgba(16, 163, 127, 0.08) 50%,
+      transparent 80%
+    );
+    filter: blur(8px);
+    opacity: 0.7;
+    transition: opacity 0.5s ease, filter 0.5s ease;
     pointer-events: none;
-    border-radius: 0;
-    opacity: 1;
   }
 
-  /* hover 时底部光晕消失（严格遵循 heavy-elephant-39） */
-  .benchmark-card-glow:hover::after {
-    opacity: 0;
+  .benchmark-card-glow:hover::before {
+    opacity: 1;
+    filter: blur(12px);
   }
 
   /* 亮色模式：光晕更淡 */
-  .benchmark-card-glow::after {
-    opacity: 0.55;
+  .benchmark-card-glow::before {
+    opacity: 0.4;
   }
-  .dark .benchmark-card-glow::after {
+  .dark .benchmark-card-glow::before {
+    opacity: 0.7;
+  }
+  .dark .benchmark-card-glow:hover::before {
     opacity: 1;
+  }
+
+  /* hover 时边框增亮 */
+  .benchmark-card-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border: 1px solid transparent;
+    background: linear-gradient(#0000, #0000) padding-box,
+      linear-gradient(
+        180deg,
+        rgba(16, 163, 127, 0.0) 0%,
+        rgba(16, 163, 127, 0.0) 100%
+      ) border-box;
+    transition: background 0.4s ease;
+    pointer-events: none;
+  }
+
+  .benchmark-card-glow:hover::after {
+    background: linear-gradient(#0000, #0000) padding-box,
+      linear-gradient(
+        180deg,
+        rgba(16, 163, 127, 0.9) 0%,
+        rgba(16, 163, 127, 0.3) 50%,
+        rgba(16, 163, 127, 0.7) 100%
+      ) border-box;
   }
 
   /* 内容区：深色/白色背景 */
@@ -278,84 +325,67 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    transition: color 0.5s ease;
+    transition: background 0.3s ease;
   }
   .dark .benchmark-card-inner {
     background: #161616;
   }
 
-  /* hover 时内容区文字颜色变化（heavy-elephant-39 效果） */
-  .benchmark-card-glow:hover .benchmark-card-inner {
-    color: #10A37F;
+  /* hover 时内容区背景轻微透绿 */
+  .dark .benchmark-card-glow:hover .benchmark-card-inner {
+    background: #181f1e;
   }
 
-  /* 荧光脉冲动画 — 用于 widely_tested 奖章卡片 */
+  /* 荧光脉冲动画 — 用于 widely_tested 奖章卡片（更柔和） */
   @keyframes neonPulse {
     0%, 100% {
       box-shadow:
-        0 0 0px rgba(245, 158, 11, 0),
-        0 0 0px rgba(245, 158, 11, 0);
+        0 2px 8px rgba(245, 158, 11, 0.08),
+        0 4px 16px rgba(245, 158, 11, 0.04);
     }
     50% {
       box-shadow:
-        0 0 14px rgba(245, 158, 11, 0.40),
-        0 0 28px rgba(245, 158, 11, 0.18);
+        0 2px 16px rgba(245, 158, 11, 0.22),
+        0 6px 28px rgba(245, 158, 11, 0.12);
     }
   }
 
   .benchmark-card-featured {
-    animation: neonPulse 3s ease-in-out infinite;
+    animation: neonPulse 4s ease-in-out infinite;
   }
 
-  /* 卡片顶部色条荧光扩散 */
-  @keyframes colorBarGlow {
-    0%, 100% { opacity: 1; filter: blur(0px); }
-    50%       { opacity: 1; filter: blur(1.5px) brightness(1.5); }
-  }
 
-  .benchmark-card-glow:hover .card-color-bar {
-    animation: colorBarGlow 1.8s ease-in-out infinite;
-  }
 
   /* ============================================
      荧光扫描线 — 卡片 hover 时的扫光效果
      ============================================ */
 
+  /* 扫描线 — 更轻柔的扫光（仅暗色模式显示） */
   @keyframes scanLine {
-    0%   { transform: translateY(-100%) skewY(-3deg); opacity: 0; }
-    10%  { opacity: 0.6; }
-    90%  { opacity: 0.6; }
-    100% { transform: translateY(400%) skewY(-3deg); opacity: 0; }
+    0%   { transform: translateY(-100%); opacity: 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateY(500%); opacity: 0; }
   }
 
   .benchmark-card-glow .scan-line {
     position: absolute;
     inset-inline: 0;
-    height: 30%;
+    height: 20%;
     background: linear-gradient(
       180deg,
       transparent 0%,
-      rgba(16, 163, 127, 0.06) 50%,
+      rgba(16, 163, 127, 0.04) 50%,
       transparent 100%
     );
     pointer-events: none;
     z-index: 2;
     opacity: 0;
-    transform: translateY(-100%) skewY(-3deg);
+    transform: translateY(-100%);
   }
 
-  .benchmark-card-glow:hover .scan-line {
-    animation: scanLine 2.4s ease-in-out infinite;
-  }
-
-  /* 暗色模式扫描线增强 */
-  .dark .benchmark-card-glow .scan-line {
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(16, 163, 127, 0.14) 50%,
-      transparent 100%
-    );
+  .dark .benchmark-card-glow:hover .scan-line {
+    animation: scanLine 3s ease-in-out infinite;
   }
 
   /* ============================================
