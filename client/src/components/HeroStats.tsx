@@ -76,24 +76,33 @@ export default function HeroStats({ data }: Props) {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex flex-wrap gap-10">
-          {stats.map((s, i) => (
-            <div key={i} className="flex flex-col gap-0.5">
-              <span
-                className="text-[32px] font-bold tabular-nums leading-none"
-                style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', color: s.color }}
-              >
-                {s.value}
-              </span>
-              <span
-                className="text-[12px]"
-                style={{ fontFamily: "'Inter', sans-serif", color: isDark ? '#4B5563' : '#9CA3AF' }}
-              >
-                {s.label}
-              </span>
-            </div>
-          ))}
+        {/* Stats + powered-by brutalist 标签 */}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap gap-10">
+            {stats.map((s, i) => (
+              <div key={i} className="flex flex-col gap-0.5">
+                <span
+                  className="text-[32px] font-bold tabular-nums leading-none"
+                  style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '-0.03em', color: s.color }}
+                >
+                  {s.value}
+                </span>
+                <span
+                  className="text-[12px]"
+                  style={{ fontFamily: "'Inter', sans-serif", color: isDark ? '#4B5563' : '#9CA3AF' }}
+                >
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* quiet-dog-6 brutalist 文字标签 */}
+          <div className="quiet-dog-tag">
+            <span className="quiet-dog-tag__text">
+              {t.poweredByFull}
+            </span>
+          </div>
         </div>
     </div>
   );

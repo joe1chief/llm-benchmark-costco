@@ -82,32 +82,41 @@ export default function HeroStats({ data }: Props) {
         </div>
 
         {/* Stats */}
-        <div className="flex flex-wrap gap-10">
-          {stats.map((s, i) => (
-            <div key={i} className="flex flex-col gap-0.5">
-              <div className="flex items-baseline gap-1">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap gap-10">
+            {stats.map((s, i) => (
+              <div key={i} className="flex flex-col gap-0.5">
+                <div className="flex items-baseline gap-1">
+                  <span
+                    className="text-[32px] font-bold tabular-nums leading-none"
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      letterSpacing: '-0.03em',
+                      color: s.color,
+                    }}
+                  >
+                    {s.value}
+                  </span>
+                </div>
                 <span
-                  className="text-[32px] font-bold tabular-nums leading-none"
+                  className="text-[12px]"
                   style={{
                     fontFamily: "'Inter', sans-serif",
-                    letterSpacing: '-0.03em',
-                    color: s.color,
+                    color: isDark ? '#4B5563' : '#9CA3AF',
                   }}
                 >
-                  {s.value}
+                  {s.label}
                 </span>
               </div>
-              <span
-                className="text-[12px]"
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  color: isDark ? '#4B5563' : '#9CA3AF',
-                }}
-              >
-                {s.label}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* quiet-dog-6 brutalist 文字标签 */}
+          <div className="quiet-dog-tag">
+            <span className="quiet-dog-tag__text">
+              powered by Ant AQ eval team
+            </span>
+          </div>
         </div>
     </div>
   );

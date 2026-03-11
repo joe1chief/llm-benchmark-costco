@@ -679,4 +679,95 @@
     position: relative;
     z-index: 1;
   }
+
+  /* ============================================
+     quiet-dog-6 文字标签 — HeroStats 内右下角
+     hover 时文字从底部滑入显示
+     ============================================ */
+  .quiet-dog-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #10A37F;
+    border-radius: 0;
+    padding: 8px 14px;
+    cursor: default;
+    background-color: transparent;
+    box-shadow: 3px 3px 0px #10A37F;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    min-width: 120px;
+    height: 38px;
+  }
+
+  .dark .quiet-dog-tag {
+    border-color: #34D399;
+    box-shadow: 3px 3px 0px #34D399;
+  }
+
+  .quiet-dog-tag:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #10A37F;
+  }
+
+  .dark .quiet-dog-tag:hover {
+    box-shadow: 5px 5px 0px #34D399;
+  }
+
+  .quiet-dog-tag:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px #10A37F;
+  }
+
+  .dark .quiet-dog-tag:active {
+    box-shadow: 1px 1px 0px #34D399;
+  }
+
+  /* 文字容器：默认在底部隐藏，hover 时从底部滑入 */
+  .quiet-dog-tag__text {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #10A37F;
+    white-space: nowrap;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1),
+                opacity 0.25s ease;
+  }
+
+  .dark .quiet-dog-tag__text {
+    color: #34D399;
+  }
+
+  .quiet-dog-tag:hover .quiet-dog-tag__text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* 默认显示占位符号，hover 时隐藏 */
+  .quiet-dog-tag::before {
+    content: "ANT AQ";
+    position: absolute;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #10A37F;
+    opacity: 0.5;
+    transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+                opacity 0.2s ease;
+  }
+
+  .dark .quiet-dog-tag::before {
+    color: #34D399;
+  }
+
+  .quiet-dog-tag:hover::before {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
 }
