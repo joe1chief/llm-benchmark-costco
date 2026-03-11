@@ -1,5 +1,5 @@
-// LLM Benchmark Costco — BenchmarkCard (i18n + Neon Glow Effect)
-import React, { useRef, useCallback } from 'react';
+// LLM Benchmark Costco — BenchmarkCard (i18n + heavy-elephant-39 Neon Glow)
+import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
 import { Calendar, Building2, BarChart3, Layers, Lock, Unlock, ShieldAlert } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -19,10 +19,10 @@ const DIFFICULTY_COLORS: Record<string, { text: string; bg: string; bgDark: stri
   '基础': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
   '中等': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
   // English keys
-  'Frontier': { text: '#DC2626', bg: 'rgba(220,38,38,0.08)', bgDark: 'rgba(220,38,38,0.12)' },
-  'Expert': { text: '#D97706', bg: 'rgba(217,119,6,0.08)', bgDark: 'rgba(217,119,6,0.12)' },
-  'Advanced': { text: '#2563EB', bg: 'rgba(37,99,235,0.08)', bgDark: 'rgba(37,99,235,0.12)' },
-  'Basic': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
+  'Frontier':     { text: '#DC2626', bg: 'rgba(220,38,38,0.08)', bgDark: 'rgba(220,38,38,0.12)' },
+  'Expert':       { text: '#D97706', bg: 'rgba(217,119,6,0.08)', bgDark: 'rgba(217,119,6,0.12)' },
+  'Advanced':     { text: '#2563EB', bg: 'rgba(37,99,235,0.08)', bgDark: 'rgba(37,99,235,0.12)' },
+  'Basic':        { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
   'Intermediate': { text: '#6B7280', bg: 'rgba(107,114,128,0.08)', bgDark: 'rgba(107,114,128,0.10)' },
 };
 
@@ -38,13 +38,10 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   const isDark = theme === 'dark';
   const isEn = lang === 'en';
   const widelyTested = b.widely_tested === true;
-  const cardRef = useRef<HTMLDivElement>(null);
 
-  // Use English difficulty key when in English mode
   const diffKey = isEn ? (b.difficulty_en || b.difficulty) : b.difficulty;
   const diffColor = DIFFICULTY_COLORS[diffKey] || DIFFICULTY_COLORS[b.difficulty];
 
-  // Use English fields when in English mode
   const intro = isEn ? (b.intro_en || b.intro) : b.intro;
   const modality = isEn ? (b.modality_en || b.modality) : b.modality;
 
@@ -55,39 +52,19 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
   };
   const opennessInfo = b.openness ? opennessConfig[b.openness] : undefined;
 
-  // 鼠标移动时更新 CSS 变量，驱动荧光光晕跟随鼠标
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    el.style.setProperty('--mx', `${x}%`);
-    el.style.setProperty('--my', `${y}%`);
-  }, []);
-
   return (
     <article
-      className="group relative cursor-pointer benchmark-card-glow"
+      className={`group cursor-pointer benchmark-card-glow ${widelyTested ? 'benchmark-card-featured' : ''}`}
       style={style}
       onClick={() => onClick(b)}
-      onMouseMove={handleMouseMove}
-      ref={cardRef}
     >
       {/* 扫光线 */}
       <div className="scan-line" aria-hidden="true" />
 
-      <div
-        className={`
-          h-full flex flex-col rounded-2xl border overflow-hidden transition-all duration-300
-          ${widelyTested ? 'benchmark-card-featured' : ''}
-          ${isDark
-            ? 'bg-[#161616] border-[#242424] hover:border-[#10A37F44] hover:shadow-[0_8px_32px_rgba(16,163,127,0.15),0_0_0_1px_rgba(16,163,127,0.15)]'
-            : 'bg-white border-[#E5E7EB] hover:border-[#10A37F55] hover:shadow-[0_4px_24px_rgba(16,163,127,0.12),0_0_0_1px_rgba(16,163,127,0.12)]'
-          }
-        `}
-      >
-        {/* Top color bar — 荧光扩散 */}
+      {/* 内层内容区 — heavy-elephant-39 的 .card-info */}
+      <div className="benchmark-card-inner h-full flex flex-col">
+
+        {/* Top color bar */}
         <div
           className="card-color-bar h-[3px] w-full shrink-0 transition-all duration-300 group-hover:h-[4px]"
           style={{
@@ -194,7 +171,7 @@ export default function BenchmarkCard({ benchmark: b, onClick, style }: Props) {
           </div>
 
           {/* Bottom tags */}
-          <div className="flex flex-wrap gap-1.5 pt-1 border-t" style={{ borderColor: isDark ? '#242424' : '#F3F4F6' }}>
+          <div className="flex flex-wrap gap-1.5 pt-1 border-t" style={{ borderColor: isDark ? '#2A2A2A' : '#F3F4F6' }}>
             {b.l1 && (
               <span
                 className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md transition-all duration-200 group-hover:brightness-110"

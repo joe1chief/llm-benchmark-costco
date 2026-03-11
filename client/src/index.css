@@ -219,18 +219,27 @@
   }
 
   /* ============================================
-     卡片动态荧光特效 v2 (heavy-elephant-39 风格)
+     卡片动态荧光特效 v3 — 严格还原 heavy-elephant-39
      参考: uiverse.io/alexruix/heavy-elephant-39
-     — 底部模糊光晕 + 鼠标跟随边框荧光 + 原配色
+     原理：
+       - 卡片外层 (.benchmark-card-glow) 作为渐变"边框"层
+       - 内层 (.card-inner) 是深色/白色内容区
+       - ::after 在 z-index: -1，top: 30px，blur(25px)，hover 时 opacity → 0
      ============================================ */
 
-  /* 卡片容器：底部模糊光晕（heavy-elephant-39 核心特征） */
+  /* 外层：渐变背景充当边框，padding: 3px */
   .benchmark-card-glow {
+    --card-gradient: linear-gradient(135deg, #10A37F 0%, #1A73E8 50%, #7C3AED 100%);
     position: relative;
+    padding: 3px;
+    border-radius: 1rem;
+    background: var(--card-gradient);
+    overflow: visible;
+    cursor: pointer;
     isolation: isolate;
   }
 
-  /* 底部扩散光晕（::after 用于底部模糊投影，参考 heavy-elephant-39 的 .card::after） */
+  /* 底部模糊光晕（heavy-elephant-39 核心：hover 时消失） */
   .benchmark-card-glow::after {
     content: '';
     position: absolute;
@@ -240,64 +249,44 @@
     z-index: -1;
     height: 100%;
     width: 100%;
-    transform: scale(0.85);
-    filter: blur(22px);
-    background: rgba(16, 163, 127, 0);
-    transition: background 0.5s ease, opacity 0.5s ease;
+    transform: scale(0.8);
+    filter: blur(25px);
+    background: var(--card-gradient);
+    transition: opacity 0.5s ease;
     pointer-events: none;
     border-radius: inherit;
-  }
-
-  /* hover 时底部光晕亮起（使用项目原配色 #10A37F） */
-  .benchmark-card-glow:hover::after {
-    background: rgba(16, 163, 127, 0.18);
-  }
-
-  /* 鼠标跟随荧光边框（::before，通过 CSS 变量 --mx / --my 驱动） */
-  .benchmark-card-glow::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.35s ease;
-    background: radial-gradient(
-      500px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(16, 163, 127, 0.38),
-      transparent 55%
-    );
-    pointer-events: none;
-    z-index: 0;
-    /* 仅在边框区域显示（mask 技术） */
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    padding: 1px;
-  }
-
-  .benchmark-card-glow:hover::before {
     opacity: 1;
   }
 
-  /* 暗色模式增强 */
-  .dark .benchmark-card-glow::before {
-    background: radial-gradient(
-      500px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(16, 163, 127, 0.55),
-      transparent 55%
-    );
+  /* hover 时底部光晕消失（严格遵循 heavy-elephant-39） */
+  .benchmark-card-glow:hover::after {
+    opacity: 0;
   }
 
-  .dark .benchmark-card-glow:hover::after {
-    background: rgba(16, 163, 127, 0.25);
+  /* 亮色模式：光晕更淡 */
+  .benchmark-card-glow::after {
+    opacity: 0.55;
+  }
+  .dark .benchmark-card-glow::after {
+    opacity: 1;
   }
 
-  /* 卡片内容层级确保在光效之上 */
-  .benchmark-card-glow > * {
-    position: relative;
-    z-index: 1;
+  /* 内容区：深色/白色背景 */
+  .benchmark-card-inner {
+    background: #FFFFFF;
+    border-radius: calc(1rem - 3px);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transition: color 0.5s ease;
+  }
+  .dark .benchmark-card-inner {
+    background: #161616;
+  }
+
+  /* hover 时内容区文字颜色变化（heavy-elephant-39 效果） */
+  .benchmark-card-glow:hover .benchmark-card-inner {
+    color: #10A37F;
   }
 
   /* 荧光脉冲动画 — 用于 widely_tested 奖章卡片 */
@@ -504,7 +493,6 @@
     padding: 0.25rem 0.5rem;
     font-weight: 700;
     transition: background-size 0.3s ease-in-out;
-    /* 文字颜色通过 gradient 覆盖 */
     background-clip: padding-box;
   }
 
@@ -521,136 +509,272 @@
   }
 
   /* ============================================
-     young-walrus-64 火焰球 Loader 特效
-     参考: uiverse.io/andrew-manzyk/young-walrus-64
-     — 用于 Hero 区域装饰
+     nice-sheep-25 原子轨道 Loader 特效
+     参考: uiverse.io/OMPRABHU8125/nice-sheep-25
+     — 用于 Hero 区域装饰（替换 young-walrus-64）
+     — 原配色 cyan 改为项目绿色 #10A37F
      ============================================ */
 
-  .flame-loader {
-    --color-one: #10A37F;
-    --color-two: #0D8F6F;
-    --color-three: rgba(16, 163, 127, 0.5);
-    --color-four: rgba(13, 143, 111, 0.5);
-    --color-five: rgba(16, 163, 127, 0.25);
-    --time-animation: 2s;
-    --size: 0.7;
-    position: relative;
-    border-radius: 50%;
-    transform: scale(var(--size));
-    box-shadow:
-      0 0 25px 0 var(--color-three),
-      0 20px 50px 0 var(--color-four);
-    animation: flameColorize calc(var(--time-animation) * 3) ease-in-out infinite;
+  .atom-loader {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     flex-shrink: 0;
   }
 
-  .flame-loader::before {
+  .atom-react-star {
+    position: relative;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: atomRotate 3s infinite;
+  }
+
+  .atom-nucleus {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: linear-gradient(#10A37F, #34D399);
+    height: 10px;
+    width: 10px;
+    animation: atomRotate 1s linear infinite;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+  }
+
+  .atom-electron {
+    position: absolute;
+    width: 54px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(16, 163, 127, 0.8);
+    animation: atomRevolve 1s linear infinite;
+  }
+
+  .atom-electron::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100px;
-    height: 100px;
+    top: 60%;
+    left: 100%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    background-color: #10A37F;
     border-radius: 50%;
-    border-top: solid 1px var(--color-one);
-    border-bottom: solid 1px var(--color-two);
-    background: linear-gradient(180deg, var(--color-five), var(--color-four));
-    box-shadow:
-      inset 0 10px 10px 0 var(--color-three),
-      inset 0 -10px 10px 0 var(--color-four);
+    animation: atomMoveElectron 1s infinite;
+    box-shadow: 0 0 6px rgba(16, 163, 127, 0.8);
   }
 
-  .flame-loader .flame-box {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(
-      180deg,
-      var(--color-one) 30%,
-      var(--color-two) 70%
-    );
-    mask: url(#flame-clipping);
-    -webkit-mask: url(#flame-clipping);
+  .atom-electron2 {
+    transform: rotate(60deg);
+    animation-delay: -0.66s;
+  }
+  .atom-electron2::before {
+    animation-delay: -0.66s;
+  }
+  .atom-electron3 {
+    transform: rotate(-60deg);
   }
 
-  .flame-loader svg {
+  @keyframes atomRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg) scale3d(1.1, 1.1, 0); }
+  }
+
+  @keyframes atomRevolve {
+    0%   { border-color: rgba(16, 163, 127, 0.6); border-right-color: transparent; }
+    25%  { border-color: rgba(16, 163, 127, 0.6); border-bottom-color: transparent; }
+    50%  { border-color: rgba(16, 163, 127, 0.6); border-left-color: transparent; }
+    75%  { border-color: rgba(16, 163, 127, 0.6); border-top-color: transparent; }
+    100% { border-color: rgba(16, 163, 127, 0.6); border-right-color: transparent; }
+  }
+
+  @keyframes atomMoveElectron {
+    0%   { top: 60%; left: 100%; }
+    25%  { top: 100%; left: 60%; }
+    50%  { top: 60%; left: 0%; }
+    75%  { top: 0%; left: 60%; }
+    100% { top: 60%; left: 100%; }
+  }
+
+  /* 暗色模式增强 */
+  .dark .atom-electron {
+    border-color: rgba(52, 211, 153, 0.9);
+  }
+  .dark .atom-electron::before {
+    background-color: #34D399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+  }
+  .dark .atom-nucleus {
+    background: linear-gradient(#34D399, #10A37F);
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+  }
+
+  /* 亮色模式透明度降低 */
+  .atom-loader-wrap {
+    transition: opacity 0.3s ease;
+  }
+
+  /* ============================================
+     quiet-dog-6 Brutalist 展示组件
+     参考: uiverse.io/0xnihilism/quiet-dog-6
+     — 放置在 FilterBar 上方，展示 "由 Ant AQ eval team提供支持"
+     ============================================ */
+
+  .brutalist-banner {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #000000;
+    border-radius: 10px;
+    padding: 0;
+    color: #000000;
+    font-weight: bold;
+    position: relative;
+    box-shadow: 3px 3px 0px #000000;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    height: 80px;
+    width: 200px;
+    cursor: default;
+    text-decoration: none;
+    background-color: #1a3d2f;
+  }
+
+  .dark .brutalist-banner {
+    border-color: #10A37F;
+    box-shadow: 3px 3px 0px #10A37F;
+    background-color: #0d2b22;
+    color: #34D399;
+  }
+
+  .brutalist-banner::before {
+    content: "";
     position: absolute;
+    left: 50%;
+    bottom: -150%;
+    width: 300%;
+    height: 300%;
+    border-radius: 50%;
+    transform: translateX(-50%) scale(0);
+    transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    z-index: 1;
+    background-color: #10A37F;
   }
 
-  .flame-loader svg #flame-clipping {
-    filter: contrast(15);
-    animation: flameRoundness calc(var(--time-animation) / 2) linear infinite;
+  .dark .brutalist-banner::before {
+    background-color: #0d8f6f;
   }
 
-  .flame-loader svg #flame-clipping polygon {
-    filter: blur(7px);
+  .brutalist-banner:hover::before {
+    transform: translateX(-50%) scale(1);
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(1) {
-    transform-origin: 75% 25%;
-    transform: rotate(90deg);
+  .brutalist-banner:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 6px 6px 0px #000000;
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(2) {
-    transform-origin: 50% 50%;
-    animation: flameRotation var(--time-animation) linear infinite reverse;
+  .dark .brutalist-banner:hover {
+    box-shadow: 6px 6px 0px #10A37F;
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(3) {
-    transform-origin: 50% 60%;
-    animation: flameRotation var(--time-animation) linear infinite;
-    animation-delay: calc(var(--time-animation) / -3);
+  .brutalist-banner:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000000;
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(4) {
-    transform-origin: 40% 40%;
-    animation: flameRotation var(--time-animation) linear infinite reverse;
+  .dark .brutalist-banner:active {
+    box-shadow: 1px 1px 0px #10A37F;
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(5) {
-    transform-origin: 40% 40%;
-    animation: flameRotation var(--time-animation) linear infinite reverse;
-    animation-delay: calc(var(--time-animation) / -2);
+  /* Logo 圆圈 */
+  .brutalist-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    background-color: #0f1715;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(6) {
-    transform-origin: 60% 40%;
-    animation: flameRotation var(--time-animation) linear infinite;
+  .brutalist-logo svg {
+    width: 26px;
+    height: 26px;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
-  .flame-loader svg #flame-clipping polygon:nth-child(7) {
-    transform-origin: 60% 40%;
-    animation: flameRotation var(--time-animation) linear infinite;
-    animation-delay: calc(var(--time-animation) / -1.5);
+  @keyframes brutalistSpin {
+    0%   { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
   }
 
-  @keyframes flameRotation {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  .brutalist-banner:hover .brutalist-logo {
+    animation: brutalistSpin 5s linear infinite;
+    width: 30px;
+    height: 30px;
+    top: 28%;
   }
 
-  @keyframes flameRoundness {
-    0%   { filter: contrast(15); }
-    20%  { filter: contrast(3); }
-    40%  { filter: contrast(3); }
-    60%  { filter: contrast(15); }
-    100% { filter: contrast(15); }
+  .brutalist-banner:hover .brutalist-logo svg {
+    transform: scale(0.7);
   }
 
-  @keyframes flameColorize {
-    0%   { filter: hue-rotate(0deg); }
-    20%  { filter: hue-rotate(-15deg); }
-    40%  { filter: hue-rotate(-30deg); }
-    60%  { filter: hue-rotate(-45deg); }
-    80%  { filter: hue-rotate(-20deg); }
-    100% { filter: hue-rotate(0deg); }
+  /* 文字区域 */
+  .brutalist-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.3;
+    transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    z-index: 2;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
   }
 
-  /* 暗色模式火焰球颜色增强 */
-  .dark .flame-loader {
-    --color-one: #10A37F;
-    --color-two: #34D399;
-    --color-three: rgba(16, 163, 127, 0.65);
-    --color-four: rgba(52, 211, 153, 0.55);
-    --color-five: rgba(16, 163, 127, 0.30);
+  .brutalist-text span:first-child {
+    font-size: 10px;
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+
+  .brutalist-text span:last-child {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+  }
+
+  .brutalist-banner:hover .brutalist-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .brutalist-banner:hover .brutalist-text span:first-child {
+    color: #d3d3d3;
+  }
+
+  .brutalist-banner:hover .brutalist-text span:last-child {
+    color: #d6cbbf;
   }
 }

@@ -1,4 +1,4 @@
-// LLM Benchmark Costco — HeroStats (i18n + lazy-cow-47 title fx + young-walrus-64 flame)
+// LLM Benchmark Costco — HeroStats (i18n + lazy-cow-47 title fx + nice-sheep-25 atom loader)
 import React from 'react';
 import type { Benchmark } from '@/types/benchmark';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -8,25 +8,16 @@ interface Props {
   data: Benchmark[];
 }
 
-/** young-walrus-64 火焰球 SVG Loader（使用项目原配色 #10A37F） */
-function FlameLoader() {
+/** nice-sheep-25 原子轨道 Loader（使用项目原配色 #10A37F） */
+function AtomLoader() {
   return (
-    <div className="flame-loader" aria-hidden="true">
-      <svg width="100" height="100" viewBox="0 0 100 100">
-        <defs>
-          <mask id="flame-clipping">
-            <polygon points="0,0 100,0 100,100 0,100" fill="black" />
-            <polygon points="25,25 75,25 50,75" fill="white" />
-            <polygon points="50,25 75,75 25,75" fill="white" />
-            <polygon points="35,35 65,35 50,65" fill="white" />
-            <polygon points="35,35 65,35 50,65" fill="white" />
-            <polygon points="35,35 65,35 50,65" fill="white" />
-            <polygon points="35,35 65,35 50,65" fill="white" />
-            <polygon points="35,35 65,35 50,65" fill="white" />
-          </mask>
-        </defs>
-      </svg>
-      <div className="flame-box" />
+    <div className="atom-loader" aria-hidden="true">
+      <div className="atom-react-star">
+        <div className="atom-nucleus" />
+        <div className="atom-electron" />
+        <div className="atom-electron atom-electron2" />
+        <div className="atom-electron atom-electron3" />
+      </div>
     </div>
   );
 }
@@ -54,26 +45,26 @@ export default function HeroStats({ data }: Props) {
       style={{ borderColor: isDark ? '#1F1F1F' : '#F3F4F6' }}
     >
       <div className="container py-10">
-        {/* Title row — lazy-cow-47 特效 + 火焰球装饰 */}
+        {/* Title row — lazy-cow-47 特效 + 原子轨道装饰 */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-2.5">
-            {/* young-walrus-64 火焰球 — 仅暗色模式显示，亮色模式透明度降低 */}
+            {/* nice-sheep-25 原子轨道 Loader */}
             <div
+              className="atom-loader-wrap"
               style={{
-                opacity: isDark ? 1 : 0.55,
+                opacity: isDark ? 1 : 0.7,
                 transition: 'opacity 0.3s ease',
                 flexShrink: 0,
               }}
             >
-              <FlameLoader />
+              <AtomLoader />
             </div>
 
             {/* 标题 — lazy-cow-47 特效 */}
             <h1
-              className={`hero-title-fx text-[30px] font-semibold tracking-tight`}
+              className="hero-title-fx text-[30px] font-semibold tracking-tight"
               style={{
                 fontFamily: "'Inter', -apple-system, sans-serif",
-                /* lazy-cow-47: 文字颜色通过 CSS 变量控制，适配亮/暗主题 */
                 color: isDark ? '#34D399' : '#10A37F',
               }}
             >
