@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdtempSync,
@@ -2352,3 +2353,230 @@ for (const invalidCliCase of [
     assert.match(result.stderr, /Invalid audit arguments:/u);
   });
 }
+
+function createHtmlFixture(t, { keepLegacyFields = false } = {}) {
+  const root = createCompleteFixture();
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const publicDir = join(root, 'client/public');
+  const graphDir = join(publicDir, 'drawio/AlphaBench');
+  for (const language of ['en', 'zh']) {
+    for (const suffix of ['svg', 'png', 'drawio']) {
+      rmSync(join(graphDir, `AlphaBench.${language}.${suffix}`));
+    }
+    const nodes = [
+      { id: 'collect', type: 'process', label: language === 'en' ? 'Collect records' : '收集记录' },
+      { id: 'evaluate', type: 'process', label: language === 'en' ? 'Evaluate answers' : '评测答案' },
+    ];
+    const edges = [{ from: 'collect', to: 'evaluate', type: 'primary' }];
+    writeJson(join(graphDir, `AlphaBench.${language}.arch.json`), { nodes, edges });
+    const specPath = join(graphDir, `AlphaBench.${language}.spec.yaml`);
+    writeFileSync(specPath, readFileSync(specPath, 'utf8').replace('nodes: []\nedges: []',
+      `nodes: ${JSON.stringify(nodes)}\nedges: ${JSON.stringify(edges)}`));
+  }
+  if (!keepLegacyFields) {
+    for (const file of ['benchmarks.json', 'benchmarks_detail/AlphaBench.json']) {
+      const path = join(publicDir, file);
+      const data = JSON.parse(readFileSync(path, 'utf8'));
+      for (const record of Array.isArray(data) ? data : [data]) {
+        for (const field of Object.keys(record)) {
+          if (/^drawio_(?:flowchart|source)_/u.test(field)) delete record[field];
+        }
+      }
+      writeJson(path, data);
+    }
+  }
+  // The retained manifest describes historical exports, not the HTML renderer.
+  mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (entries) => {
+    entries[0].strict_validation = { en: 'pending', zh: 'failed' };
+    entries[0].review_status = 'pending';
+  });
+  return root;
+}
+
+function mutateHtmlJson(root, file, mutate) {
+  const path = join(root, 'client/public', file);
+  const data = JSON.parse(readFileSync(path, 'utf8'));
+  mutate(data);
+  writeJson(path, data);
+}
+
+function runHtmlAudit(root, options = ['--html']) {
+  const result = spawnSync(process.execPath,
+    [auditScript.pathname, '--root', root, '--json', ...options], { encoding: 'utf8' });
+  assert.equal(result.error, undefined);
+  return { ...result, summary: JSON.parse(result.stdout) };
+}
+
+for (const keepLegacyFields of [false, true]) {
+  test(`HTML accepts bilingual spec/arch without any legacy export files (stale fields: ${keepLegacyFields})`, (t) => {
+    const root = createHtmlFixture(t, { keepLegacyFields });
+    const { status, summary, stderr } = runHtmlAudit(root);
+    assert.equal(status, 0, stderr || JSON.stringify(summary));
+    assert.equal(summary.profile, 'html');
+    assert.equal(summary.complete_bilingual_total, 1);
+    assert.equal(summary.complete_aggregate_total, 1);
+    assert.equal(summary.paper_aligned_total, 1);
+    assert.equal(summary.id_sets_equal, true);
+    assert.equal(summary.png_complete_total, null);
+    assert.equal(summary.strict_valid_total, null);
+    assert.equal(summary.visually_reviewed_total, null);
+    for (const [field, value] of Object.entries(summary)) {
+      if (Array.isArray(value)) assert.deepEqual(value, [], field);
+    }
+    const legacy = runHtmlAudit(root, []);
+    assert.equal(legacy.status, 1);
+    assert.ok(legacy.summary.broken_references.length > 0);
+    assert.equal(legacy.summary.png_issues.length, 2);
+    assert.equal(legacy.summary.strict_issues.length, 2);
+    assert.equal(legacy.summary.visual_issues.length, 1);
+  });
+}
+
+test('HTML ignores retained invalid SVG exports while legacy still validates them', (t) => {
+  const root = createHtmlFixture(t, { keepLegacyFields: true });
+  writeFileSync(join(root, 'client/public/drawio/AlphaBench/AlphaBench.en.svg'), 'invalid export');
+  assert.equal(runHtmlAudit(root).status, 0);
+  assert.ok(runHtmlAudit(root, []).summary.svg_issues.some((issue) => issue.issue === 'invalid_svg_root'));
+});
+
+const htmlFailures = [
+  ['missing architecture', (root) => rmSync(join(root, 'client/public/drawio/AlphaBench/AlphaBench.zh.arch.json')), 'broken_references'],
+  ['missing spec', (root) => rmSync(join(root, 'client/public/drawio/AlphaBench/AlphaBench.en.spec.yaml')), 'broken_references'],
+  ['missing source identity', (root) => mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (rows) => { delete rows[0].source_url; }), 'source_issues'],
+  ['missing source locator', (root) => mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (rows) => { delete rows[0].source_locator; }), 'source_issues'],
+  ['unreviewed paper', (root) => mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (rows) => { rows[0].paper_alignment_review.status = 'pending'; }), 'paper_alignment_issues'],
+  ['mismatched reviewed source', (root) => mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (rows) => { rows[0].paper_alignment_review.source_url = 'https://example.com/wrong-paper'; }), 'paper_alignment_issues'],
+  ['duplicate identity', (root) => mutateHtmlJson(root, 'benchmarks.json', (rows) => { rows.push(rows[0]); }), 'aggregate_issues'],
+  ['outside-public asset reference', (root) => mutateHtmlJson(root, 'benchmarks_detail/AlphaBench.json', (record) => { record.drawio_arch_en = '../outside.arch.json'; }), 'broken_references'],
+  ['missing node label', (root) => mutateHtmlJson(root, 'drawio/AlphaBench/AlphaBench.en.arch.json', (graph) => { graph.nodes[0].label = ''; }), 'language_issues'],
+  ['duplicate node identity', (root) => mutateHtmlJson(root, 'drawio/AlphaBench/AlphaBench.en.arch.json', (graph) => { graph.nodes.push(graph.nodes[0]); }), 'topology_issues'],
+  ['unknown edge endpoint', (root) => mutateHtmlJson(root, 'drawio/AlphaBench/AlphaBench.en.arch.json', (graph) => { graph.edges[0].to = 'missing'; }), 'topology_issues'],
+  ['missing Chinese metadata', (root) => {
+    const path = join(root, 'client/public/drawio/AlphaBench/AlphaBench.zh.spec.yaml');
+    writeFileSync(path, readFileSync(path, 'utf8').replace('title: AlphaBench 构建流程', 'title: AlphaBench Build Process'));
+  }, 'language_issues'],
+];
+for (const [name, mutate, issueField] of htmlFailures) {
+  test(`HTML rejects ${name} even with historical export checks disabled`, (t) => {
+    const root = createHtmlFixture(t);
+    mutate(root);
+    const { status, summary } = runHtmlAudit(root);
+    assert.equal(status, 1, JSON.stringify(summary));
+    assert.ok(summary[issueField].length > 0, issueField);
+    assert.equal(summary.unresolved_queue.length, 1);
+    const entry = summary.unresolved_queue[0];
+    assert.equal(entry.gates.png, null);
+    assert.equal(entry.gates.visual, null);
+    assert.doesNotMatch(entry.next_action, /export|SVG|PNG|strict draw\.io/iu);
+    assert.deepEqual(summary.png_issues, []);
+    assert.deepEqual(summary.svg_issues, []);
+    assert.deepEqual(summary.strict_issues, []);
+    assert.deepEqual(summary.visual_issues, []);
+  });
+}
+
+function addHtmlGeneration(root) {
+  mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (entries) => {
+    const generation = { format: 'html-flowchart-generation/v1', model_version: 1 };
+    for (const kind of ['spec', 'arch']) {
+      generation[`${kind}_sha256`] = Object.fromEntries(['en', 'zh'].map(language => [
+        language,
+        createHash('sha256').update(readFileSync(join(root, 'client/public',
+          entries[0].assets[`drawio_${kind}_${language}`]))).digest('hex'),
+      ]));
+    }
+    entries[0].html_generation = generation;
+  });
+}
+
+for (const options of [[], ['--html']]) {
+  test(`optional HTML lineage accepts actual bytes and absent historical field (${options.length ? 'HTML' : 'legacy'})`, (t) => {
+    const root = createCompleteFixture();
+    t.after(() => rmSync(root, { recursive: true, force: true }));
+    assert.equal(runHtmlAudit(root, options).status, 0);
+    addHtmlGeneration(root);
+    const result = runHtmlAudit(root, options);
+    assert.equal(result.status, 0, JSON.stringify(result.summary));
+    assert.deepEqual(result.summary.data_consistency_issues, []);
+    assert.deepEqual(result.summary.unresolved_queue, []);
+    mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (entries) => {
+      entries[0].html_generation.arch_sha256.en = '0'.repeat(64);
+    });
+    const broken = runHtmlAudit(root, options);
+    assert.equal(broken.status, 1);
+    assert.ok(broken.summary.data_consistency_issues.some(issue => issue.issue === 'html_generation_hash_mismatch'));
+  });
+}
+
+for (const kind of ['spec', 'arch']) {
+  for (const language of ['en', 'zh']) {
+    for (const mutation of ['hash', 'bytes', 'missing language']) {
+      test(`HTML lineage rejects ${mutation} for ${kind}.${language}`, (t) => {
+        const root = createHtmlFixture(t);
+        addHtmlGeneration(root);
+        if (mutation === 'bytes') {
+          const suffix = kind === 'spec' ? 'spec.yaml' : 'arch.json';
+          const path = join(root, 'client/public/drawio/AlphaBench', `AlphaBench.${language}.${suffix}`);
+          // Semantically identical YAML/JSON must still invalidate a byte digest.
+          writeFileSync(path, Buffer.concat([readFileSync(path), Buffer.from('\n')]));
+        } else {
+          mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', (entries) => {
+            const hashes = entries[0].html_generation[`${kind}_sha256`];
+            if (mutation === 'hash') hashes[language] = '0'.repeat(64);
+            else delete hashes[language];
+          });
+        }
+        const result = runHtmlAudit(root);
+        assert.equal(result.status, 1);
+        assert.deepEqual(result.summary.data_consistency_issues.map(({ field, issue }) => ({ field, issue })), [{
+          field: `html_generation.${kind}_sha256.${language}`,
+          issue: mutation === 'missing language' ? 'invalid_html_generation_hash' : 'html_generation_hash_mismatch',
+        }]);
+        assert.equal(result.summary.unresolved_queue[0].gates.core, false);
+        assert.deepEqual(result.summary.paper_alignment_issues, []);
+      });
+    }
+  }
+}
+
+for (const [name, mutate] of [
+  ['null record', entry => { entry.html_generation = null; }],
+  ['array record', entry => { entry.html_generation = []; }],
+  ['wrong format', entry => { entry.html_generation.format = 'html-flowchart-generation/v2'; }],
+  ['wrong version', entry => { entry.html_generation.model_version = 2; }],
+  ['string version', entry => { entry.html_generation.model_version = '1'; }],
+  ['missing hash map', entry => { delete entry.html_generation.spec_sha256; }],
+  ['malformed digest', entry => { entry.html_generation.arch_sha256.en = 'not-a-sha256'; }],
+  ['outside-public path', entry => { entry.assets.drawio_spec_en = '../outside.spec.yaml'; }],
+]) {
+  test(`HTML lineage fails closed on ${name}`, (t) => {
+    const root = createHtmlFixture(t);
+    addHtmlGeneration(root);
+    mutateHtmlJson(root, 'benchmarks_build_process_manifest.json', entries => mutate(entries[0]));
+    const result = runHtmlAudit(root);
+    assert.equal(result.status, 1);
+    assert.ok(result.summary.data_consistency_issues.some(issue => issue.field?.startsWith('html_generation')));
+  });
+}
+
+test('HTML lineage rejects a missing referenced file', (t) => {
+  const root = createHtmlFixture(t);
+  addHtmlGeneration(root);
+  rmSync(join(root, 'client/public/drawio/AlphaBench/AlphaBench.zh.spec.yaml'));
+  const result = runHtmlAudit(root);
+  assert.equal(result.status, 1);
+  assert.ok(result.summary.data_consistency_issues.some(issue => issue.issue === 'html_generation_asset_unreadable'));
+});
+
+test('HTML lineage rejects a symlink outside public even when bytes match', (t) => {
+  const root = createHtmlFixture(t);
+  addHtmlGeneration(root);
+  const path = join(root, 'client/public/drawio/AlphaBench/AlphaBench.en.spec.yaml');
+  const outside = join(root, 'outside.spec.yaml');
+  writeFileSync(outside, readFileSync(path));
+  rmSync(path);
+  symlinkSync(outside, path);
+  const result = runHtmlAudit(root);
+  assert.equal(result.status, 1);
+  assert.ok(result.summary.data_consistency_issues.some(issue => issue.issue === 'html_generation_asset_path_invalid'));
+});

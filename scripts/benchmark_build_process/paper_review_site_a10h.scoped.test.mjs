@@ -38,6 +38,14 @@ const edgeMap = arch => new Map(arch.edges.map(edge => [
   edge,
 ]));
 
+function mermaidArrow(edge) {
+  const label = String(edge.label ?? '').trim();
+  const escaped = mermaidLabel(label).replace(/\|/gu, '&#124;');
+  return edge.type === 'primary'
+    ? (label ? `-->|${escaped}|` : '-->')
+    : (label ? `-. ${escaped} .->` : '-.->');
+}
+
 function topology(arch) {
   return {
     nodes: arch.nodes.map(({ id, type }) => ({ id, type })),
@@ -58,7 +66,7 @@ function renderFallback(arch) {
     lines.push(`    ${node.id}["${mermaidLabel(node.label)}"]`);
   }
   for (const edge of arch.edges) {
-    lines.push(`    ${edge.from} ${edge.type === 'primary' ? '-->' : '-.->'} ${edge.to}`);
+    lines.push(`    ${edge.from} ${mermaidArrow(edge)} ${edge.to}`);
   }
   return lines.join('\n');
 }
@@ -210,7 +218,7 @@ test('pins CountBench and CounterFactQA paper and official-source boundaries', (
   );
 });
 
-test('keeps CraftBench as a released AWM scenario, not a standalone benchmark', () => {
+test("keeps CraftBench as a released AWM scenario, not a standalone benchmark", () => {
   for (const language of ['en', 'zh']) {
     const arch = readArch('CraftBench', language);
     const nodes = nodeMap(arch);
@@ -293,6 +301,9 @@ test('keeps CraftBench as a released AWM scenario, not a standalone benchmark', 
     detail.drawio_review_note,
     /§3\.1.*§3\.2.*§3\.3.*Table 15.*85e322f69279e3b3325b7377ec3bab788514e9cb.*dde80a0283fe781bdc51656bce57063dc5650213.*manufacturing_execution_system_1.*≤\s*0\.85.*schema.*feedback loop.*sample data.*feedback loop.*environment.*feedback loop.*agent trajectory.*structured verification signals.*10 tasks.*18 tables.*114.*50 endpoints.*no standalone.*metric/isu,
   );
+});
+
+test("checks optional export fidelity: keeps CraftBench as a released AWM scenario, not a standalone benchmark", () => {
   for (const language of ['en', 'zh']) {
     const drawio = readFileSync(
       join(publicDir, 'drawio', 'CraftBench', `CraftBench.${language}.drawio`),

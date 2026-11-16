@@ -41,6 +41,21 @@ const readArch = (id, language) => readJson(
   join(publicDir, 'drawio', id, `${id}.${language}.arch.json`),
 );
 
+function mermaidLabel(label) {
+  return String(label)
+    .replace(/\\/gu, '\\\\')
+    .replace(/"/gu, '\\"')
+    .replace(/\r?\n/gu, '<br/>');
+}
+
+function mermaidArrow(edge) {
+  const label = String(edge.label ?? '').trim();
+  const escaped = mermaidLabel(label).replace(/\|/gu, '&#124;');
+  return edge.type === 'primary'
+    ? (label ? `-->|${escaped}|` : '-->')
+    : (label ? `-. ${escaped} .->` : '-.->');
+}
+
 function positionedTopology(graph) {
   return {
     nodes: graph.nodes.map(({ id, type, size, position }) => ({ id, type, size, position })),
@@ -73,7 +88,7 @@ function renderFallback(graph) {
   const lines = ['flowchart LR'];
   for (const node of graph.nodes) lines.push(`    ${node.id}["${encode(node.label)}"]`);
   for (const edge of graph.edges) {
-    const arrow = edge.type === 'primary' ? '-->' : '-.->';
+    const arrow = mermaidArrow(edge);
     lines.push(`    ${edge.from} ${arrow} ${edge.to}`);
   }
   return lines.join('\n');
@@ -163,6 +178,20 @@ test('registers all four A12g packages with complete paper-aligned manifest sema
       ];
       assert.equal(steps.length, labels.length, `${id}.${language} step count`);
       assert.deepEqual(new Set(steps), new Set(labels), `${id}.${language} manifest labels`);
+    }
+  }
+});
+
+test("keeps source topology independent of optional exports: paper_review_site_a12g", () => {
+  for (const id of benchmarkIds) {
+    for (const language of ['en', 'zh']) {
+      const spec = readSpec(id, language);
+      const arch = readArch(id, language);
+      assert.deepEqual(canonicalGraph(arch), canonicalGraph(spec));
+      assert.deepEqual(arch.counts, {
+        ...expectedCounts.get(id),
+        modules: (spec.modules ?? []).length,
+      });
     }
   }
 });
